@@ -7,6 +7,9 @@ import { useStore, sel } from '../../src/data/store';
 import { PRODUCTS, Product, PayMethod, Pass } from '../../src/data/types';
 import { fmtDT, won, ymd } from '../../src/lib/fmt';
 import { C, F } from '../../src/theme';
+import { api } from '../../src/lib/supabase';
+
+const LIVE_PAY = false; // 토스페이먼츠 결제창 연결 뒤 true. 그 전에는 예약 요청 → 운영자 전화 → 결제 링크
 
 const MAIN: Product[] = ['pass3', 'pass10', 'member'];
 const MORE: Product[] = ['p60', 'p90', 'p120', 'pass5', 'pass20', 'pass30', 'monthly4', 'monthly8'];
@@ -26,9 +29,18 @@ export default function Book() {
   const total = gift ? 0 : P.price + extraFee * (P.total || 1);
   const ready = !!rec.addressDetail && !!d1;
 
-  const pay = () => {
+  const [busy, setBusy] = useState(false);
+  const pay = async () => {
     const slot1: Pass['slot1'] = { date: d1, slot: sl1 }; const slot2: Pass['slot2'] = d2 ? { date: d2, slot: sl2 } : undefined;
     if (gift) { useStore.setState((st) => ({ passes: st.passes.map((p) => (p.id === gift.id ? { ...p, slot1, slot2 } : p)) })); s.toast('희망 일정을 받았어요. 72시간 안에 첫 일정을 정해 드립니다.'); return r.replace('/(family)/home'); }
+    if (!LIVE_PAY) {
+      setBusy(true);
+      const out = await api<{ ticketId?: string }>('app', { op: 'booking-request', product, slot1, slot2, extras, recipient: { name: rec.name, honorific: rec.honorific, sigungu: rec.sigungu, dong: rec.dong, addressDetail: rec.addressDetail, deviceBrand: rec.deviceBrand, pains: rec.pains } });
+      setBusy(false);
+      s.requestBooking(rec.id, product, slot1, slot2, extras, typeof out.ticketId === 'string' ? out.ticketId : undefined);
+      s.toast(out.ok ? '요청을 받았어요. 담당자가 빠르게 연락드리겠습니다.' : '요청은 저장됐어요. 연결이 되면 담당자에게 전달됩니다.');
+      return r.replace('/(family)/home');
+    }
     s.checkout(rec.id, product, slot1, slot2, method, extras); r.replace('/(family)/home');
   };
 
@@ -62,7 +74,7 @@ export default function Book() {
         </Chips></View>
       )}
       <Tile pad={14} title={d1 ? `희망 일정 ${fmtDT(d1 + 'T00:00:00', false)} ${{ am: '오전', pm: '오후', eve: '저녁' }[sl1]}` : '희망 일정을 골라 주세요'} text="72시간 안에 강사와 첫 일정이 정해집니다. 안 되면 전액 환불." />
-      {!gift && (
+      {!gift && LIVE_PAY && (
         <View><T v="lbl">결제 수단</T><Chips>
           {([['card', '카드'], ['transfer', '계좌이체'], ['vaccount', '가상계좌'], ['manual', '무통장 입금']] as [PayMethod, string][]).map(([k, l]) => <Chip key={k} big label={l} kind="line" sel={method === k} onPress={() => setMethod(k)} />)}
         </Chips>{(method === 'vaccount' || method === 'manual') && <T v="cap" style={{ marginTop: 6 }}>입금 기한 3일. 입금이 확인되면 그때부터 72시간 안에 일정을 정해 드립니다.</T>}</View>
@@ -73,8 +85,9 @@ export default function Book() {
         <KV k="환불" v="첫 수업 전까지 전액" />
         {!gift && extraFee > 0 && <KV k="추가 비용" v={`회당 ${won(extraFee)}`} />}
       </Box>
-      <Btn label={gift ? '희망 일정 보내기' : `${won(total)} 결제하기`} disabled={!ready} onPress={pay} />
-      <T v="fine">{method === 'card' ? '토스페이먼츠 카드 결제' : method === 'transfer' ? '토스페이먼츠 계좌이체' : method === 'vaccount' ? '토스페이먼츠 가상계좌' : '법인 계좌 무통장 입금'} · 영수증 자동 발급 · 유효기간 안 미사용분은 사용 회차를 정가로 빼고 환불</T>
+      {!gift && !LIVE_PAY && <Box kind="peach" tight><T style={{ fontSize: 13 }}>요청을 보내면 담당자가 배정되어 빠르게 연락드리겠습니다. 전화로 {rec.honorific} 상황을 여쭙고 결제 링크를 보내드려요. 결제 전까지 비용은 없습니다.</T></Box>}
+      <Btn label={gift ? '희망 일정 보내기' : LIVE_PAY ? `${won(total)} 결제하기` : `${PRODUCTS[product].name} 예약 요청하기`} disabled={!ready || busy} onPress={pay} />
+      <T v="fine">{LIVE_PAY ? `${method === 'card' ? '토스페이먼츠 카드 결제' : method === 'transfer' ? '토스페이먼츠 계좌이체' : method === 'vaccount' ? '토스페이먼츠 가상계좌' : '법인 계좌 무통장 입금'} · 영수증 자동 발급 · ` : `${won(total)} · 카드, 계좌이체, 무통장 입금 · 영수증 발급 · `}유효기간 안 미사용분은 사용 회차를 정가로 빼고 환불</T>
     </Screen>
   );
 }

@@ -30,6 +30,8 @@ export interface Actions {
   logout: () => void; setMode: (m: Mode) => void; toast: (t?: string) => void; reset: () => void;
   saveRecipient: (id: string, patch: Partial<Recipient>) => void;
   checkout: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], method: PayMethod, extras?: string[]) => Pass;
+  requestBooking: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], extras: string[], ticketId?: string) => Pass;
+  cancelBooking: (passId: string) => void;
   confirmDeposit: (passId: string) => void; refund: (passId: string, reason: string) => number; extendPromise: (passId: string) => void;
   redeemGift: (code: string, recipientId: string) => { ok: boolean; error?: string; pass?: Pass };
   acceptAssignment: (id: string, slot: 1 | 2) => { ok: boolean; error?: string };
@@ -121,6 +123,13 @@ export const useStore = create<State & Actions>()(
         if (immediate) get().toast('결제가 완료됐어요. 72시간 안에 첫 일정을 정해 드립니다.');
         return pass;
       },
+      requestBooking: (recipientId, product, slot1, slot2, extras, ticketId) => {
+        const P = PRODUCTS[product];
+        const pass: Pass = { id: uid('p'), recipientId, product, total: P.total, remaining: P.total, price: P.price, status: 'requested', validUntil: new Date(Date.now() + P.months * 30 * 86400000).toISOString(), slot1, slot2, source: 'pg', extras, noShowCount: 0, ticketId };
+        set((s) => ({ passes: [...s.passes.filter((x) => !(x.recipientId === recipientId && x.status === 'requested')), pass] }));
+        return pass;
+      },
+      cancelBooking: (passId) => set((s) => ({ passes: s.passes.map((p) => (p.id === passId ? { ...p, status: 'cancelled' } : p)) })),
       confirmDeposit: (passId) => set((s) => ({ passes: s.passes.map((p) => (p.id === passId ? { ...p, status: 'paid', paidAt: now(), promiseDueAt: addH(now(), RULES.promiseHours) } : p)) })),
       extendPromise: (passId) => set((s) => ({ passes: s.passes.map((p) => (p.id === passId ? { ...p, promiseDueAt: addH(p.promiseDueAt ?? now(), RULES.promiseHours), promiseExtended: true } : p)) })),
       refund: (passId, reason) => {
@@ -257,7 +266,7 @@ export const useStore = create<State & Actions>()(
 // ---------- 파생값 ----------
 export const sel = {
   myRecipient: (s: State) => s.recipients[0],
-  activePass: (s: State, rid: string) => s.passes.find((p) => p.recipientId === rid && ['paid', 'active', 'pending_deposit'].includes(p.status)),
+  activePass: (s: State, rid: string) => s.passes.find((p) => p.recipientId === rid && ['paid', 'active', 'pending_deposit', 'requested'].includes(p.status)),
   usedCount: (s: State, rid: string) => s.sessions.filter((x) => x.recipientId === rid && ['done', 'submitted'].includes(x.status)).length,
   totalBought: (s: State, rid: string) => s.passes.filter((p) => p.recipientId === rid && !['draft', 'cancelled', 'refunded', 'pending_deposit'].includes(p.status)).reduce((a, p) => a + p.total, 0),
   nextSession: (s: State, rid: string) => s.sessions.filter((x) => x.recipientId === rid && ['scheduled', 'confirmed', 'departed', 'arrived', 'in_progress', 'submitted'].includes(x.status)).sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))[0],

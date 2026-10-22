@@ -7,6 +7,7 @@ import { useStore, sel } from '../../src/data/store';
 import { fmtDT, remain, won, slotLabel } from '../../src/lib/fmt';
 import { PRODUCTS } from '../../src/data/types';
 import { C, F } from '../../src/theme';
+import { api } from '../../src/lib/supabase';
 
 export default function Home() {
   const r = useRouter();
@@ -25,6 +26,24 @@ export default function Home() {
       <Box kind="white"><T v="sub">주소와 쓰시는 기기, 가장 불편한 것을 적으면 상담 뒤 배정이 시작됩니다.</T><Btn label="어르신 정보 적기" style={{ marginTop: 12 }} onPress={() => r.push('/family/profile')} /></Box>
     </Screen>
   );
+
+  if (pass && pass.status === 'requested') {
+    return (
+      <Screen>
+        <Row><Grow>{greet}<T v="ttl">담당자가{'\n'}배정됐어요</T></Grow><Icon src="icBell" size={56} /></Row>
+        <Tile dark title="빠르게 연락드리겠습니다" text={`전화로 ${rec.honorific} 상황을 여쭙고 결제 링크를 보내드려요. 결제 뒤 72시간 안에 첫 일정이 정해집니다.`} />
+        <Box kind="white">
+          <KV first k="상품" v={`${PRODUCTS[pass.product].name} · ${won(pass.price)}`} />
+          <KV k="희망 일정" v={pass.slot1 ? `${fmtDT(pass.slot1.date + 'T00:00:00', false)} ${slotLabel(pass.slot1.slot)}` : '-'} />
+          {pass.slot2 && <KV k="두 번째 희망" v={`${fmtDT(pass.slot2.date + 'T00:00:00', false)} ${slotLabel(pass.slot2.slot)}`} />}
+          <KV k="연락 받을 번호" v={`010-${s.account.phone.slice(3, 7)}-${s.account.phone.slice(7)}`} />
+        </Box>
+        <Box kind="white" tight><Row><Avatar src="teacher3" size={36} /><Grow><T b style={{ fontSize: 13.5 }}>운영자 상담</T><T v="cap">월~금 10:00~18:00 · 010-3871-5430</T></Grow><Chip label="전화" kind="line" /></Row></Box>
+        <Btn label="요청 취소하기" kind="ghost" onPress={() => Alert.alert('요청을 취소할까요', '결제 전이라 비용은 없습니다.', [{ text: '아니오' }, { text: '취소하기', onPress: () => { api('app', { op: 'booking-cancel', ticketId: pass.ticketId }); s.cancelBooking(pass.id); } }])} />
+        <T v="fine" style={{ textAlign: 'center' }}>결제 전까지 비용은 없습니다.</T>
+      </Screen>
+    );
+  }
 
   if (pass && (pass.status === 'paid' || pass.status === 'pending_deposit') && !next) {
     const pending = pass.status === 'pending_deposit';

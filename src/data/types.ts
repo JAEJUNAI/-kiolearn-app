@@ -27,11 +27,11 @@ export const PRODUCTS: Record<Product, { name: string; price: number; total: num
   member: { name: '멤버십', price: 29000, total: 0, sub: '첫 방문 90분 + 월 2회 전화 점검', months: 1 },
 };
 export type PayMethod = 'card' | 'transfer' | 'vaccount' | 'manual';
-export type PassStatus = 'draft' | 'pending_deposit' | 'paid' | 'active' | 'exhausted' | 'expired' | 'refunded' | 'cancelled';
+export type PassStatus = 'draft' | 'requested' | 'pending_deposit' | 'paid' | 'active' | 'exhausted' | 'expired' | 'refunded' | 'cancelled';
 export interface Pass {
   id: string; recipientId: string; product: Product; total: number; remaining: number; price: number; status: PassStatus;
   method?: PayMethod; paidAt?: string; promiseDueAt?: string; promiseExtended?: boolean; validUntil?: string;
-  slot1?: { date: string; slot: 'am' | 'pm' | 'eve' }; slot2?: { date: string; slot: 'am' | 'pm' | 'eve' }; source: 'pg' | 'gift' | 'org'; extras?: string[];
+  slot1?: { date: string; slot: 'am' | 'pm' | 'eve' }; slot2?: { date: string; slot: 'am' | 'pm' | 'eve' }; source: 'pg' | 'gift' | 'org'; extras?: string[]; ticketId?: string;
   noShowCount: number;
 }
 
