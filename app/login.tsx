@@ -15,13 +15,14 @@ export default function Login() {
   const [dev, setDev] = useState(false);
   const [role, setRole] = useState<'family' | 'instructor'>(as === 'instructor' ? 'instructor' : 'family');
   const [phone, setPhone] = useState(''); const [otp, setOtp] = useState(''); const [cert, setCert] = useState(''); const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [err, setErr] = useState<string | undefined>(); const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | undefined>(); const [busy, setBusy] = useState(false); const [needCert, setNeedCert] = useState(false);
   const digits = phone.replace(/\D/g, '');
 
   const send = async () => { setErr(undefined); setBusy(true); const res = await sendOtp(digits); setBusy(false); if (!res.ok) return setErr(res.error ?? '문자를 보내지 못했어요.'); setDev(!!res.dev); setStep('otp'); };
   const verify = async () => {
-    setErr(undefined); setBusy(true); const res = await verifyOtp(digits, otp, role === 'instructor' ? cert : undefined); setBusy(false);
+    setErr(undefined); setBusy(true); const res = await verifyOtp(digits, otp, role === 'instructor' && cert.length >= 10 ? cert : undefined); setBusy(false);
     if (!res.ok || !res.account) return setErr(res.error ?? '번호가 맞지 않아요. 다시 확인해 주세요.');
+    if (role === 'instructor' && !res.instructor) { setNeedCert(true); return setErr(cert ? '자격번호를 확인해 주세요.' : '처음 강사로 들어오실 때는 자격번호가 필요해요. 한 번 확인되면 다음부터는 묻지 않습니다.'); }
     loginServer({ phone: digits, name: res.account.name, roles: res.account.roles, instructor: res.instructor ?? null });
     r.replace('/');
   };
@@ -45,7 +46,7 @@ export default function Login() {
         <>
           <Input value={otp} onChangeText={(v) => setOtp(v.replace(/\D/g, '').slice(0, 6))} placeholder="인증번호 6자리" keyboardType="number-pad" maxLength={6} right={dev ? <T v="cap">개발 모드: 아무 6자리</T> : undefined} />
           {role === 'instructor' && (
-            <View><T v="lbl">자격번호</T><Input value={cert} onChangeText={(v) => setCert(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" right={cert.length > 10 ? <Chip label="확인" kind="ok" /> : undefined} /></View>
+            <View><T v="lbl">자격번호 <T v="cap">처음 한 번만. 이미 확인된 번호면 비워 두세요</T></T><Input value={cert} onChangeText={(v) => setCert(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" right={cert.length > 10 ? <Chip label="확인" kind="ok" /> : needCert ? <Chip label="필요" /> : undefined} /></View>
           )}
         </>
       )}
@@ -55,7 +56,7 @@ export default function Login() {
 
       {step === 'phone'
         ? <Btn label="인증번호 받기" onPress={send} disabled={digits.length !== 11 || busy} />
-        : <Btn label={role === 'instructor' ? '들어가기' : '인증하고 시작하기'} onPress={verify} disabled={otp.length !== 6 || busy || (role === 'instructor' && cert.length < 10)} />}
+        : <Btn label={role === 'instructor' ? '들어가기' : '인증하고 시작하기'} onPress={verify} disabled={otp.length !== 6 || busy} />}
 
       {role === 'instructor' && (
         <Box>

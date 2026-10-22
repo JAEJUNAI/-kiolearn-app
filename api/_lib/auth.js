@@ -64,6 +64,11 @@ async function upsertAccount(phone, name, certNo) {
     roles.add('instructor'); instructor = { traineeId: t.id, name: t.name, certNo: t.cert_no };
     if (!name) name = t.name;
   }
+  // 자격번호를 다시 넣지 않아도, 이미 강사 역할이 붙은 계정이면 학습실에서 자격을 확인해 돌려준다(정지·종료면 역할 유지하되 instructor는 null)
+  if (!instructor && roles.has('instructor') && acc && acc.trainee_id) {
+    const t = await one(`teach_trainees?select=id,name,cert_no,status&id=eq.${acc.trainee_id}`);
+    if (t && t.cert_no && t.status !== '보류' && t.status !== '종료') instructor = { traineeId: t.id, name: t.name, certNo: t.cert_no };
+  }
   const body = { phone, name: name || (acc && acc.name) || '', roles: [...roles], last_login_at: new Date().toISOString(), trainee_id: instructor ? instructor.traineeId : (acc && acc.trainee_id) || null };
   acc = acc ? await one(`app_accounts?id=eq.${acc.id}`, { method: 'PATCH', body }) : await one('app_accounts', { method: 'POST', body });
   return { account: acc, instructor };
