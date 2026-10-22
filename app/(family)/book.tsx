@@ -68,7 +68,7 @@ export default function Book() {
         </Chips>{(method === 'vaccount' || method === 'manual') && <T v="cap" style={{ marginTop: 6 }}>입금 기한 3일. 입금이 확인되면 그때부터 72시간 안에 일정을 정해 드립니다.</T>}</View>
       )}
       <Box kind="white">
-        <KV first k="자격 확인" v="서류 3종 · 배상책임보험" />
+        <KV first k="자격 확인" v="자격증 · 신분증 · 범죄경력" />
         <KV k="리포트" v="수업마다 사진과 결과" />
         <KV k="환불" v="첫 수업 전까지 전액" />
         {!gift && extraFee > 0 && <KV k="추가 비용" v={`회당 ${won(extraFee)}`} />}

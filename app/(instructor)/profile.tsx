@@ -15,7 +15,7 @@ export default function Profile() {
       <Box tight>
         <KV first k="배정" v={`${me.stats.assigned}회`} />
         <KV k="재예약" v={`${me.stats.rebooked}건`} />
-        <KV k="자격·보험" v="서류 3종 · 배상책임보험" />
+        <KV k="자격 확인" v="서류 3종 확인" />
         <KV k="자격번호" v={me.certNo} />
       </Box>
       <View>
