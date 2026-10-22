@@ -84,7 +84,8 @@ export default function Root() {
     'Pretendard-Bold': require('../assets/fonts/Pretendard-Bold.otf'),
     'Pretendard-ExtraBold': require('../assets/fonts/Pretendard-ExtraBold.otf'),
   });
-  if (!loaded) return <View style={{ flex: 1, backgroundColor: '#fff' }} />;
+  // 서체 로딩을 기다리지 않는다. 느린 회선에서 흰 화면이 길어지는 것을 막고, 로드되면 자연스럽게 바뀐다.
+  void loaded;
   const web = Platform.OS === 'web';
   const wide = web && typeof location !== 'undefined' && /[?&]wide/.test(location.search);
   const desktop = web && !wide && width >= 900;
