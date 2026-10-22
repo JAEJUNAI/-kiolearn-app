@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Pressable, Platform, useWindowDimensions, Linking } from 'react-native';
 import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
+import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -40,7 +41,7 @@ function DesktopShell({ children }: { children: React.ReactNode }) {
   return (
     <View style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
       <View style={{ height: 64, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: C.line, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 32, gap: 10 }}>
-        <View style={{ width: 24, height: 24, borderRadius: 8, backgroundColor: C.fg, alignItems: 'center', justifyContent: 'center' }}><View style={{ width: 10, height: 10, borderRadius: 3, backgroundColor: C.orange }} /></View>
+        <Image source={require('../assets/img/app-mark.png')} style={{ width: 28, height: 28, borderRadius: 8 }} />
         <T style={{ fontFamily: F.extra, fontSize: 17 }}>키오런</T>
         <T v="cap" style={{ marginLeft: 6 }}>부모님 1:1 과외</T>
         <View style={{ flex: 1 }} />
@@ -96,6 +97,18 @@ export default function Root() {
   );
   return (
     <SafeAreaProvider>
+      {web && (
+        <Head>
+          <title>키오런 - 부모님 1:1 과외</title>
+          <meta name="description" content="자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁에 가서 90분 동안 함께 눌러 봅니다. 그날 저녁 사진과 결과가 옵니다." />
+          <meta name="theme-color" content="#ffffff" />
+          <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          <link rel="manifest" href="/manifest.webmanifest" />
+          <meta property="og:title" content="키오런 - 부모님 1:1 과외" />
+          <meta property="og:image" content="https://app.kiolearn.co.kr/icon-512.png" />
+        </Head>
+      )}
       {desktop ? <DesktopShell>{app}</DesktopShell> : (
         <View style={{ flex: 1, backgroundColor: web ? '#f3f3f3' : '#fff' }}>
           <View style={{ flex: 1, width: '100%', maxWidth: web && !wide ? 480 : undefined, alignSelf: 'center', backgroundColor: '#fff' }}>{app}</View>
