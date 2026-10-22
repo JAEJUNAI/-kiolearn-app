@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
       if (DEV) return res.status(200).json({ ok: true, dev: true, message: '개발 모드: 아무 6자리로 들어갑니다.' });
       const { code } = await auth.issue(phone);
       const r = await sms.send(phone, `[키오런] 인증번호 ${code} (3분 안에 입력)`);
-      if (!r.ok) { console.error('sms fail', r.error); throw err(502, '문자를 보내지 못했어요. 잠시 뒤 다시 해 주세요.'); }
+      if (!r.ok) { console.error('sms fail', r.error); const e = err(502, '문자를 보내지 못했어요. 잠시 뒤 다시 해 주세요.'); e.detail = String(r.error || '').slice(0, 80); throw e; }
       return res.status(200).json({ ok: true });
     }
     if (op === 'otp-verify') {
@@ -42,7 +42,7 @@ module.exports = async function handler(req, res) {
     throw err(400, `알 수 없는 op: ${op}`);
   } catch (e) {
     const st = e.status || 500;
-    return res.status(st).json({ ok: false, error: e.message === 'SETUP_REQUIRED' ? '앱 데이터베이스가 아직 준비되지 않았습니다.' : e.message === 'STORE_NOT_CONFIGURED' ? '서버 설정이 비어 있습니다.' : e.message });
+    return res.status(st).json({ ok: false, detail: e.detail || undefined, error: e.message === 'SETUP_REQUIRED' ? '앱 데이터베이스가 아직 준비되지 않았습니다.' : e.message === 'STORE_NOT_CONFIGURED' ? '서버 설정이 비어 있습니다.' : e.message });
   }
 };
 function pub(a) { return { id: a.id, phone: a.phone, name: a.name, roles: a.roles, lastMode: a.last_mode || 'family', traineeId: a.trainee_id || null }; }
