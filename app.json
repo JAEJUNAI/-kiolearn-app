@@ -1,25 +1,63 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "키오런",
+    "slug": "kiolearn-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "kr.co.kiolearn.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "리포트 사진을 찍을 때 씁니다.",
+        "NSLocationWhenInUseUsageDescription": "도착 확인에 한 번만 씁니다."
+      }
     },
     "android": {
+      "package": "kr.co.kiolearn.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "도착 확인에 한 번만 씁니다."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "리포트 사진을 찍을 때 씁니다."
+        }
+      ]
+    ],
+    "scheme": "kiolearn",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#ffffff"
+    },
+    "experiments": {
+      "typedRoutes": false
     }
   }
 }
