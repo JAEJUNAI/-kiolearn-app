@@ -2,7 +2,7 @@
 const crypto = require('crypto');
 const { sb, one, digits, err } = require('./db');
 
-const secret = () => process.env.APP_SECRET || crypto.createHash('sha256').update('app:' + (process.env.SUPABASE_SERVICE_ROLE_KEY || '')).digest('hex');
+const secret = () => (process.env.APP_SECRET || '').trim() || crypto.createHash('sha256').update('app:' + (process.env.SUPABASE_SERVICE_ROLE_KEY || '')).digest('hex');
 const hash = (phone, code) => crypto.createHmac('sha256', secret()).update(`${phone}:${code}`).digest('hex');
 const b64u = (s) => Buffer.from(s).toString('base64').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
 const unb64u = (s) => Buffer.from(String(s).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');

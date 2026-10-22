@@ -1,6 +1,6 @@
 // Supabase REST(service role) 헬퍼. 앱 테이블은 RLS를 켜 두고 정책을 두지 않아, 이 서버 키로만 읽고 씁니다.
-const url = (process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const url = (process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+const key = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
 async function sb(path, opts = {}) {
   if (!url || !key) throw Object.assign(new Error('STORE_NOT_CONFIGURED'), { status: 503 });

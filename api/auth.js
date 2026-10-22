@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
       if (DEV) return res.status(200).json({ ok: true, dev: true, message: '개발 모드: 아무 6자리로 들어갑니다.' });
       const { code } = await auth.issue(phone);
       const r = await sms.send(phone, `[키오런] 인증번호 ${code} (3분 안에 입력)`);
-      if (!r.ok) throw err(502, '문자를 보내지 못했어요. 잠시 뒤 다시 해 주세요.');
+      if (!r.ok) { console.error('sms fail', r.error); throw err(502, '문자를 보내지 못했어요. 잠시 뒤 다시 해 주세요.'); }
       return res.status(200).json({ ok: true });
     }
     if (op === 'otp-verify') {
