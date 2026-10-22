@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { View, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Screen, T, Row, Grow, Avatar, ModTile, Box, KV, Toggle, Chip } from '../../src/ui';
+import { Screen, T, Row, Grow, Avatar, ModTile, Box, KV, Toggle, Chip, Input, Btn } from '../../src/ui';
 import { useStore, sel } from '../../src/data/store';
 import { C } from '../../src/theme';
+import { Alert as RNAlert } from 'react-native';
 import { setToken, api } from '../../src/lib/supabase';
 
 export default function More() {
@@ -19,6 +20,14 @@ export default function More() {
     Alert.alert('계정을 삭제할까요', '30일 뒤 완전히 지워집니다.', [{ text: '아니오' }, { text: '삭제', style: 'destructive', onPress: () => { api('auth', { op: 'delete' }); setToken(''); s.logout(); r.replace('/login'); } }]);
   };
   const roles = s.account.roles;
+  const [certInput, setCertInput] = useState(''); const [certOpen, setCertOpen] = useState(false); const [certBusy, setCertBusy] = useState(false);
+  const claim = async () => {
+    setCertBusy(true); const out = (await api('auth', { op: 'claim-cert', cert_no: certInput })) as { ok: boolean; error?: string; instructor?: { name: string; certNo: string }; account?: { roles: string[] } };
+    setCertBusy(false);
+    if (!out.ok || !out.instructor) return RNAlert.alert('등록할 수 없어요', out.error ?? '자격번호를 확인해 주세요.');
+    s.loginServer({ phone: s.account.phone, name: s.account.name, roles: (out.account?.roles as string[]) ?? [...roles, 'instructor'], instructor: out.instructor });
+    setCertOpen(false); s.toast('강사 자격이 등록됐어요. 강사 모드로 열립니다.'); r.replace('/(instructor)/today');
+  };
   return (
     <Screen>
       <Row><Avatar src={s.account.photo ?? 'teacher3'} size={48} /><Grow><T v="h" style={{ fontSize: 16 }}>{s.account.name} 님</T><T v="cap">010-{s.account.phone.slice(3, 7)}-**** · {rec.honorific} 1명 연결</T></Grow>
@@ -36,6 +45,8 @@ export default function More() {
         <KV k="가족 초대 · 권한" onPress={() => r.push('/family/invite')} style={{ paddingVertical: 12 }} />
         <KV k={<T b style={{ fontSize: 13.5 }}>강사 변경 요청</T>} sub="운영자가 전화로 사정을 듣고 바꿔드려요" onPress={change} style={{ paddingVertical: 12 }} />
         <KV k="어르신 정보 수정" onPress={() => r.push('/family/profile')} style={{ paddingVertical: 12 }} />
+        {!roles.includes('instructor') && <KV k={<T b style={{ fontSize: 13.5 }}>강사 자격번호 등록</T>} sub="학습실에서 받은 KL-DC-… 번호" onPress={() => setCertOpen(!certOpen)} style={{ paddingVertical: 12 }} />}
+        {certOpen && <View style={{ paddingVertical: 8, gap: 8 }}><Input value={certInput} onChangeText={(v) => setCertInput(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" /><Btn label="등록" size="sm" disabled={certInput.length < 10 || certBusy} onPress={claim} style={{ alignSelf: 'flex-end' }} /></View>}
         <KV k="배우고, 일로 잇기 (과정)" onPress={() => r.push('/courses')} style={{ paddingVertical: 12 }} />
       </Box>
       <Box style={{ paddingVertical: 2 }}>

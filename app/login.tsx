@@ -46,7 +46,7 @@ export default function Login() {
         <>
           <Input value={otp} onChangeText={(v) => setOtp(v.replace(/\D/g, '').slice(0, 6))} placeholder="인증번호 6자리" keyboardType="number-pad" maxLength={6} right={dev ? <T v="cap">개발 모드: 아무 6자리</T> : undefined} />
           {role === 'instructor' && (
-            <View><T v="lbl">자격번호 <T v="cap">처음 한 번만. 이미 확인된 번호면 비워 두세요</T></T><Input value={cert} onChangeText={(v) => setCert(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" right={cert.length > 10 ? <Chip label="확인" kind="ok" /> : needCert ? <Chip label="필요" /> : undefined} /></View>
+            <View><T v="lbl">자격번호 <T v="cap">처음 한 번만. 이미 등록했으면 비워 두세요. 나중에 더보기에서도 등록할 수 있어요</T></T><Input value={cert} onChangeText={(v) => setCert(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" right={cert.length > 10 ? <Chip label="확인" kind="ok" /> : needCert ? <Chip label="필요" /> : undefined} /></View>
           )}
         </>
       )}

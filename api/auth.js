@@ -35,6 +35,12 @@ module.exports = async function handler(req, res) {
       const settings = acc.roles.includes('instructor') ? await one(`app_instructor_settings?select=*&account_id=eq.${acc.id}`) : null;
       return res.status(200).json({ ok: true, account: pub(acc), settings, dev: DEV });
     }
+    if (op === 'claim-cert') {
+      const { account, instructor } = await auth.upsertAccount(acc.phone, acc.name, String(body.cert_no || '').trim());
+      if (!instructor) throw err(400, '자격번호를 확인해 주세요.');
+      await slack(`📱 강사 자격 등록 — ${instructor.name} (${instructor.certNo})`);
+      return res.status(200).json({ ok: true, account: pub(account), instructor });
+    }
     if (op === 'delete') {
       await sb(`app_accounts?id=eq.${acc.id}`, { method: 'PATCH', prefer: 'return=minimal', body: { status: 'deleted', delete_requested_at: new Date().toISOString() } });
       await slack(`🗑 계정 삭제 요청 — ${acc.name || ''} ${acc.phone.slice(-4)} (30일 뒤 삭제)`);
