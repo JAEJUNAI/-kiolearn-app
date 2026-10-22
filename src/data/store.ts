@@ -26,6 +26,7 @@ export interface State {
 }
 export interface Actions {
   login: (phone: string, certNo?: string) => { ok: boolean; error?: string };
+  loginServer: (r: { phone: string; name: string; roles: string[]; instructor: { name: string; certNo: string } | null }) => void;
   logout: () => void; setMode: (m: Mode) => void; toast: (t?: string) => void; reset: () => void;
   saveRecipient: (id: string, patch: Partial<Recipient>) => void;
   checkout: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], method: PayMethod, extras?: string[]) => Pass;
@@ -94,6 +95,11 @@ export const useStore = create<State & Actions>()(
         }
         set({ loggedIn: true, instructorId, account: { ...st.account, phone: phone.replace(/\D/g, ''), roles: [...roles] }, mode: certNo ? 'instructor' : st.mode });
         return { ok: true };
+      },
+      loginServer: (r) => {
+        const st = get();
+        const instructors = r.instructor ? st.instructors.map((i, k) => (k === 0 ? { ...i, name: r.instructor!.name, certNo: r.instructor!.certNo } : i)) : st.instructors;
+        set({ loggedIn: true, instructorId: r.instructor ? 'i1' : st.instructorId, instructors, account: { ...st.account, phone: r.phone, name: r.name || st.account.name, roles: r.roles as Account['roles'] }, mode: r.instructor ? 'instructor' : st.mode });
       },
       logout: () => set({ loggedIn: false }),
       setMode: (mode) => set({ mode }),

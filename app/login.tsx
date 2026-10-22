@@ -4,25 +4,25 @@ import { View, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Screen, T, Btn, Input, Box, Chip, Row, Grow, Icon } from '../src/ui';
 import { useStore } from '../src/data/store';
-import { sendOtp, verifyOtp, LIVE } from '../src/lib/supabase';
+import { sendOtp, verifyOtp } from '../src/lib/supabase';
 import { C, F } from '../src/theme';
 
 const fmtPhone = (v: string) => { const d = v.replace(/\D/g, '').slice(0, 11); return d.length > 7 ? `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}` : d.length > 3 ? `${d.slice(0, 3)}-${d.slice(3)}` : d; };
 
 export default function Login() {
   const r = useRouter(); const { invite, as } = useLocalSearchParams<{ invite?: string; as?: string }>();
-  const login = useStore((s) => s.login); const rec = useStore((s) => s.recipients[0]);
+  const loginServer = useStore((s) => s.loginServer); const rec = useStore((s) => s.recipients[0]);
+  const [dev, setDev] = useState(false);
   const [role, setRole] = useState<'family' | 'instructor'>(as === 'instructor' ? 'instructor' : 'family');
   const [phone, setPhone] = useState(''); const [otp, setOtp] = useState(''); const [cert, setCert] = useState(''); const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [err, setErr] = useState<string | undefined>(); const [busy, setBusy] = useState(false);
   const digits = phone.replace(/\D/g, '');
 
-  const send = async () => { setErr(undefined); setBusy(true); const res = await sendOtp(digits); setBusy(false); if (!res.ok) return setErr(res.error ?? '문자를 보내지 못했어요.'); setStep('otp'); };
+  const send = async () => { setErr(undefined); setBusy(true); const res = await sendOtp(digits); setBusy(false); if (!res.ok) return setErr(res.error ?? '문자를 보내지 못했어요.'); setDev(!!res.dev); setStep('otp'); };
   const verify = async () => {
-    setErr(undefined); setBusy(true); const res = await verifyOtp(digits, otp); setBusy(false);
-    if (!res.ok) return setErr(res.error ?? '번호가 맞지 않아요. 다시 확인해 주세요.');
-    const out = login(digits, role === 'instructor' ? cert : undefined);
-    if (!out.ok) return setErr(out.error);
+    setErr(undefined); setBusy(true); const res = await verifyOtp(digits, otp, role === 'instructor' ? cert : undefined); setBusy(false);
+    if (!res.ok || !res.account) return setErr(res.error ?? '번호가 맞지 않아요. 다시 확인해 주세요.');
+    loginServer({ phone: digits, name: res.account.name, roles: res.account.roles, instructor: res.instructor ?? null });
     r.replace('/');
   };
 
@@ -43,7 +43,7 @@ export default function Login() {
 
       {step === 'otp' && (
         <>
-          <Input value={otp} onChangeText={(v) => setOtp(v.replace(/\D/g, '').slice(0, 6))} placeholder="인증번호 6자리" keyboardType="number-pad" maxLength={6} right={!LIVE ? <T v="cap">개발 모드: 아무 6자리</T> : undefined} />
+          <Input value={otp} onChangeText={(v) => setOtp(v.replace(/\D/g, '').slice(0, 6))} placeholder="인증번호 6자리" keyboardType="number-pad" maxLength={6} right={dev ? <T v="cap">개발 모드: 아무 6자리</T> : undefined} />
           {role === 'instructor' && (
             <View><T v="lbl">자격번호</T><Input value={cert} onChangeText={(v) => setCert(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" right={cert.length > 10 ? <Chip label="확인" kind="ok" /> : undefined} /></View>
           )}

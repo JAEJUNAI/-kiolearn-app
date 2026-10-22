@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Screen, T, Row, Grow, Avatar, ModTile, Box, KV, Toggle, Chip } from '../../src/ui';
 import { useStore, sel } from '../../src/data/store';
 import { C } from '../../src/theme';
+import { setToken, api } from '../../src/lib/supabase';
 
 export default function More() {
   const r = useRouter(); const s = useStore(); const rec = sel.myRecipient(s);
@@ -15,7 +16,7 @@ export default function More() {
   const del = () => {
     const active = s.passes.some((p) => p.recipientId === rec.id && ['paid', 'active'].includes(p.status) && p.remaining > 0);
     if (active) return Alert.alert('남은 회차가 있어요', '환불하거나 다른 가족에게 양도한 뒤 삭제할 수 있어요.');
-    Alert.alert('계정을 삭제할까요', '30일 뒤 완전히 지워집니다.', [{ text: '아니오' }, { text: '삭제', style: 'destructive', onPress: () => { s.logout(); r.replace('/login'); } }]);
+    Alert.alert('계정을 삭제할까요', '30일 뒤 완전히 지워집니다.', [{ text: '아니오' }, { text: '삭제', style: 'destructive', onPress: () => { api('auth', { op: 'delete' }); setToken(''); s.logout(); r.replace('/login'); } }]);
   };
   const roles = s.account.roles;
   return (
@@ -40,7 +41,7 @@ export default function More() {
       <Box style={{ paddingVertical: 2 }}>
         <KV first k="이용약관 · 개인정보" onPress={() => s.toast('kiolearn.co.kr/visit-terms')} style={{ paddingVertical: 12 }} />
         <KV k="활동 모드로 보기 (부모님 폰)" onPress={() => { s.setMode('senior'); r.replace('/(senior)/today'); }} style={{ paddingVertical: 12 }} />
-        <KV k="로그아웃" onPress={() => { s.logout(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
+        <KV k="로그아웃" onPress={() => { setToken(''); s.logout(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
         <KV k={<T style={{ color: C.danger, fontSize: 13.5 }}>계정 삭제</T>} onPress={del} style={{ paddingVertical: 12 }} />
         <KV k={<T v="cap">개발용: 데이터 초기화</T>} onPress={() => { s.reset(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
       </Box>

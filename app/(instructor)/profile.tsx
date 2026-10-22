@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen, T, Row, Grow, Avatar, Chips, Chip, Box, KV, Btn, Input } from '../../src/ui';
 import { useStore, sel } from '../../src/data/store';
+import { setToken } from '../../src/lib/supabase';
 
 export default function Profile() {
   const r = useRouter(); const s = useStore(); const me = sel.me(s);
@@ -33,7 +34,7 @@ export default function Profile() {
         {s.account.roles.includes('family') && <KV first k="가족 모드로 보기" onPress={() => { s.setMode('family'); r.replace('/(family)/home'); }} style={{ paddingVertical: 12 }} />}
         <KV first={!s.account.roles.includes('family')} k="배우고, 일로 잇기 (과정)" onPress={() => r.push('/courses')} style={{ paddingVertical: 12 }} />
         <KV k="수료증 · 출강 자격" onPress={() => r.push('/courses/certs')} style={{ paddingVertical: 12 }} />
-        <KV k="로그아웃" onPress={() => { s.logout(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
+        <KV k="로그아웃" onPress={() => { setToken(''); s.logout(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
       </Box>
     </Screen>
   );
