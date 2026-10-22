@@ -16,6 +16,7 @@ module.exports = async function handler(req, res) {
   try {
     if (op === 'otp-send') {
       const phone = digits(body.phone);
+      if (process.env.REVIEW_PHONE && digits(process.env.REVIEW_PHONE) === phone) return res.status(200).json({ ok: true, review: true });
       if (DEV) return res.status(200).json({ ok: true, dev: true, message: '개발 모드: 아무 6자리로 들어갑니다.' });
       const { code } = await auth.issue(phone);
       const r = await sms.send(phone, `[키오런] 인증번호 ${code} (3분 안에 입력)`);

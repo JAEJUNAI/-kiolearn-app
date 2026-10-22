@@ -20,7 +20,19 @@ function Toast() {
   );
 }
 
+function useShotHook() {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof location === 'undefined') return;
+    const m = location.search.match(/[?&]shot=(family|instructor|senior)/); if (!m) return;
+    const st = useStore.getState(); if (st.loggedIn && st.mode === m[1]) return;
+    st.reset();
+    useStore.getState().loginServer({ phone: '01043210000', name: '은희', roles: ['family', 'seeker', 'instructor'], instructor: { name: '박미선', certNo: 'KL-DC-2026-0417' } });
+    useStore.getState().setMode(m[1] as 'family' | 'instructor' | 'senior');
+  }, []);
+}
+
 export default function Root() {
+  useShotHook();
   const [loaded] = useFonts({
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
     'Pretendard-Medium': require('../assets/fonts/Pretendard-Medium.otf'),

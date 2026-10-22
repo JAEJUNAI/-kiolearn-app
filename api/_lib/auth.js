@@ -27,9 +27,13 @@ async function issue(phoneRaw) {
   return { phone, code };
 }
 
+/** 스토어 심사용 계정: REVIEW_PHONE + REVIEW_CODE 면 문자 없이 통과 */
+const isReview = (phone, code) => !!process.env.REVIEW_PHONE && digits(process.env.REVIEW_PHONE) === phone && String(code) === String(process.env.REVIEW_CODE || '').trim();
+
 /** OTP 검증. 성공 시 해당 행을 쓴 것으로 표시. 개발 모드(문자 미설정)면 어떤 6자리든 통과. */
 async function check(phoneRaw, code, dev) {
   const phone = digits(phoneRaw);
+  if (isReview(phone, code)) return phone;
   if (dev && /^\d{6}$/.test(String(code))) return phone;
   const row = await one(`app_otps?select=*&phone=eq.${phone}&used_at=is.null&order=created_at.desc&limit=1`);
   if (!row) throw err(404, '인증번호를 먼저 받아 주세요.');
@@ -50,7 +54,9 @@ async function upsertAccount(phone, name, certNo) {
   let acc = await one(`app_accounts?select=*&phone=eq.${phone}`);
   const roles = new Set((acc && acc.roles) || ['family', 'seeker']);
   let instructor = null;
-  if (certNo) {
+  if (certNo && process.env.REVIEW_PHONE && digits(process.env.REVIEW_PHONE) === phone) {
+    roles.add('instructor'); instructor = { traineeId: null, name: '심사용 강사', certNo: String(certNo).toUpperCase() }; name = name || '심사용';
+  } else if (certNo) {
     const t = await one(`teach_trainees?select=id,name,phone,cert_no,status&cert_no=eq.${encodeURIComponent(String(certNo).trim().toUpperCase())}`);
     if (!t) throw err(404, '자격번호를 찾을 수 없어요. 학습실에서 발급 여부를 확인해 주세요.');
     if (digits(t.phone) !== phone) throw err(403, '자격번호의 전화번호와 다릅니다. 학습실에 등록한 번호로 로그인해 주세요.');
