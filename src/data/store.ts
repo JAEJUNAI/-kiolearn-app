@@ -47,6 +47,7 @@ export interface Actions {
   updateSettings: (patch: Partial<Instructor['settings']>) => void; updateIntro: (intro: string) => void;
   missionDone: (id: string) => void; help: (kind: '자녀에게 알리기' | '선생님 불러 주세요') => string;
   linkOrg: (code: string, consentIdentify: boolean) => { ok: boolean; org?: Org };
+  setLinkedOrg: (org: Org, consentIdentify: boolean) => void;
   enroll: (courseId: string) => void; completeCourse: (courseId: string) => void; verifyEligibility: () => void;
   ticket: (kind: string, body: string) => void; setGuardianPay: (recipientId: string, accountId: string, canPay: boolean) => void;
 }
@@ -249,6 +250,11 @@ export const useStore = create<State & Actions>()(
         set((s) => ({ linkedOrgId: org.id, recipients: s.recipients.map((r, i) => (i === 0 ? { ...r, orgId: org.id } : r)), tickets: consent ? [...s.tickets, { kind: 'org_consent', body: org.id, at: now() }] : s.tickets }));
         return { ok: true, org };
       },
+      setLinkedOrg: (org, consent) => set((s) => ({
+        orgs: [org, ...s.orgs.filter((o) => o.id !== org.id)], linkedOrgId: org.id,
+        recipients: s.recipients.map((r, i) => (i === 0 ? { ...r, orgId: org.id } : r)),
+        tickets: consent ? [...s.tickets, { kind: 'org_consent', body: org.id, at: now() }] : s.tickets,
+      })),
       enroll: (courseId) => set((s) => ({ enrollments: [...s.enrollments.filter((e) => e.courseId !== courseId), { courseId, at: now(), status: 'paid' }] })),
       completeCourse: (courseId) => {
         const st = get(); const c = st.courses.find((x) => x.id === courseId)!;

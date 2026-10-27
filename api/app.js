@@ -43,6 +43,28 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, ticketId: row && row.id });
     }
 
+    // ── 기관 연결 (K1): 기관 코드 조회 → 멤버 등록. 코드는 app_orgs 에 운영자가 발급한다 (예: IC-BPS-2026) ──
+    if (op === 'org-lookup' || op === 'org-link') {
+      const code = String(body.code || '').toUpperCase().replace(/\s/g, ''); if (code.length < 6) throw err(400, '기관 코드를 입력해 주세요.');
+      const org = (await sb(`app_orgs?select=id,name,type,code,programs&code=eq.${encodeURIComponent(code)}`))[0];
+      if (!org) throw err(404, '코드를 찾을 수 없어요. 기관에서 받은 코드를 다시 확인해 주세요.');
+      const posts = (await sb(`app_org_posts?select=id,title,body,event_at,place,apply_phone&org_id=eq.${org.id}&order=created_at.asc`)) || [];
+      const programs = Array.isArray(org.programs) ? org.programs : [];
+      const out = {
+        id: org.id, name: org.name, type: org.type || '', code: org.code,
+        program: programs.map((p) => [p.title, p.period].filter(Boolean).join(' · ')).join(' / ') || undefined,
+        posts: posts.map((p) => ({ id: p.id, title: p.title, when: p.body || (p.event_at ? String(p.event_at).slice(0, 10) : ''), place: p.place || undefined, apply: !!p.apply_phone, phone: p.apply_phone || undefined })),
+      };
+      if (op === 'org-link') {
+        const consent = !!body.consent;
+        const ex = await sb(`app_org_members?select=id&org_id=eq.${org.id}&account_id=eq.${acc.id}`);
+        if (ex && ex[0]) await sb(`app_org_members?id=eq.${ex[0].id}`, { method: 'PATCH', prefer: 'return=minimal', body: { consent_identify: consent, linked_at: new Date().toISOString() } });
+        else await one('app_org_members', { method: 'POST', body: { org_id: org.id, account_id: acc.id, consent_identify: consent } });
+        await slack(`🏢 기관 연결 — ${org.name} (${org.code}) ← ${acc.name || ''} ${acc.phone}${consent ? ' · 이름·연락처 전달 동의' : ' · 숫자만'}`);
+      }
+      return res.status(200).json({ ok: true, org: out });
+    }
+
     throw err(400, `알 수 없는 op: ${op}`);
   } catch (e) {
     return res.status(e.status || 500).json({ ok: false, error: e.message === 'SETUP_REQUIRED' ? '앱 데이터베이스가 아직 준비되지 않았습니다.' : e.message });
