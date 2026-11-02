@@ -64,8 +64,9 @@ export function calcPayout(s: Session, opts: { normal: boolean; earlyEnd?: boole
   const rows: { kind: Payout['kind']; amount: number; note: string; sub?: string }[] = [];
   const name = `${s.seq}회`;
   if (opts.normal) rows.push({ kind: 'session', amount: RULES.payBase, note: name, sub: '리포트 제출' });
-  const transport = opts.normal || opts.earlyEnd || (opts.noShow && !!s.confirmedAt);
-  if (transport) rows.push({ kind: 'transport', amount: RULES.payTransport, note: '교통비', sub: opts.earlyEnd ? '조기 종료 · 재방문' : opts.noShow ? '만나지 못함 · 전날 통화 기록' : undefined });
+  // 2026-11-02: 정상 수업은 35,000에 교통비 포함. 조기 종료·노쇼(전날 통화 기록)만 이동 보상 5,000.
+  const transport = opts.earlyEnd || (opts.noShow && !!s.confirmedAt);
+  if (transport) rows.push({ kind: 'transport', amount: RULES.payTransport, note: '이동 보상', sub: opts.earlyEnd ? '조기 종료 · 재방문' : opts.noShow ? '만나지 못함 · 전날 통화 기록' : undefined });
   if (opts.normal) {
     if (s.flags?.two) rows.push({ kind: 'extra', amount: RULES.payTwo, note: '두 분 수업' });
     if (s.flags?.weekendEve) rows.push({ kind: 'extra', amount: RULES.payWeekendEve, note: '주말·저녁' });

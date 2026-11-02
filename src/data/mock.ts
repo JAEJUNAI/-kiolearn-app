@@ -76,7 +76,6 @@ const thisMonth = ym(new Date().toISOString());
 export const payouts: Payout[] = [
   ...sessions.filter((s) => s.status === 'done' && ym(s.scheduledAt) === thisMonth).flatMap((s) => [
     { id: `po${s.seq}a`, instructorId: 'i1', sessionId: s.id, month: thisMonth, kind: 'session' as const, amount: 35000, note: `김옥순 어머님 ${s.seq}회`, sub: '리포트 제출', status: 'confirmed' as const, date: s.scheduledAt },
-    { id: `po${s.seq}b`, instructorId: 'i1', sessionId: s.id, month: thisMonth, kind: 'transport' as const, amount: 5000, note: '교통비', status: 'confirmed' as const, date: s.scheduledAt },
   ]),
   { id: 'po20', instructorId: 'i1', sessionId: 's20', month: thisMonth, kind: 'transport', amount: 5000, note: '최영자 어머님 1회', sub: '조기 종료 20분 · 재방문', status: 'confirmed', date: at(-6, 10) },
   { id: 'po_call', instructorId: 'i1', month: thisMonth, kind: 'call', amount: 5000, note: '멤버십 점검 통화', sub: '10분', status: 'confirmed', date: at(-9, 11) },
