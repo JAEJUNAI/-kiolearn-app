@@ -12,9 +12,8 @@ export interface Recipient {
   guardians: { accountId: string; name: string; isPrimary: boolean; canPay: boolean; canView: boolean; smsOnly?: boolean; relation?: string }[];
 }
 
-export type Product = 'p60' | 'p90' | 'p120' | 'pass3' | 'pass5' | 'pass10' | 'pass20' | 'pass30' | 'monthly4' | 'monthly8' | 'member';
+export type Product = 'p90' | 'p120' | 'pass3' | 'pass5' | 'pass10' | 'pass20' | 'pass30' | 'monthly4' | 'monthly8' | 'member';
 export const PRODUCTS: Record<Product, { name: string; price: number; total: number; sub: string; months: number; per?: number }> = {
-  p60: { name: '60분 1회', price: 59000, total: 1, sub: '60분 × 1회', months: 3 },
   p90: { name: '90분 1회', price: 79000, total: 1, sub: '90분 × 1회', months: 3 },
   p120: { name: '120분 두 분', price: 119000, total: 1, sub: '두 분 함께 × 1회', months: 3 },
   pass3: { name: '3회권', price: 199000, total: 3, sub: '90분 × 3회 · 같은 강사가 끝까지', months: 6, per: 66333 },

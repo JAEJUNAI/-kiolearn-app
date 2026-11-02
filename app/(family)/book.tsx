@@ -12,7 +12,7 @@ import { api } from '../../src/lib/supabase';
 const LIVE_PAY = false; // 토스페이먼츠 결제창 연결 뒤 true. 그 전에는 예약 요청 → 운영자 전화 → 결제 링크
 
 const MAIN: Product[] = ['pass3', 'pass10', 'member'];
-const MORE: Product[] = ['p60', 'p90', 'p120', 'pass5', 'pass20', 'pass30', 'monthly4', 'monthly8'];
+const MORE: Product[] = ['p90', 'p120', 'pass5', 'pass20', 'pass30', 'monthly4', 'monthly8'];
 const OPEN_AREAS = ['서울', '하남', '구리', '성남', '광명', '부천', '고양'];
 type Slot = 'am' | 'pm' | 'eve';
 

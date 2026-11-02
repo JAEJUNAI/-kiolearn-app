@@ -79,7 +79,7 @@ export function calcPayout(s: Session, opts: { normal: boolean; earlyEnd?: boole
 export function calcRefund(p: Pass): number {
   const used = p.total - p.remaining;
   if (used <= 0) return p.price;
-  const unit = p.product === 'p60' ? 59000 : p.product === 'p120' ? 119000 : 79000;
+  const unit = p.product === 'p120' ? 119000 : 79000;
   return Math.max(0, p.price - Math.round(used * unit));
 }
 
