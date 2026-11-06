@@ -4,19 +4,21 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Screen, Nav, T, Input, Chips, Chip, Btn, Row, Toggle, Grow } from '../../src/ui';
 import { useStore, sel } from '../../src/data/store';
+import { pushProfile } from '../../src/lib/profile';
 
 const PAINS = ['은행 앱', '키오스크', '사진 보내기', '병원 예약', '사기 문자', '영상통화', '지도·길 찾기'];
 
 export default function Profile() {
   const r = useRouter(); const s = useStore(); const rec = sel.myRecipient(s);
   const [f, setF] = useState({ honorific: rec.honorific, name: rec.name, sigungu: rec.sigungu, dong: rec.dong, addressDetail: rec.addressDetail ?? '', deviceBrand: rec.deviceBrand ?? '', pains: rec.pains, photoConsent: !!rec.photoConsent });
-  const ok = f.name.length >= 2 && !!f.sigungu && !!f.dong && !!f.deviceBrand;
-  const save = () => { s.saveRecipient(rec.id, { ...f, honorificTeacher: rec.honorificTeacher }); s.toast('저장했어요.'); r.back(); };
+  // 모든 칸은 선택. 예약(배정)에는 시·구, 동, 상세 주소가 필요하다.
+  const forBooking = !!f.sigungu && !!f.dong && !!f.addressDetail;
+  const save = async () => { s.saveRecipient(rec.id, { ...f, honorific: f.honorific || '부모님', honorificTeacher: rec.honorificTeacher }); const out = await pushProfile(); s.toast(out.ok ? '저장했어요.' : '이 기기에는 저장했어요. 서버 저장은 다시 시도해 주세요.'); r.canGoBack() ? r.back() : r.replace('/'); };
   return (
     <Screen>
       <Nav title="어르신 정보" right={<T v="cap">{rec.consultDoneAt ? '상담 완료' : '작성 중'}</T>} />
       <Row style={{ gap: 8 }}>
-        <View style={{ width: 110 }}><T v="lbl">호칭</T><Input value={f.honorific} onChangeText={(v) => setF({ ...f, honorific: v })} placeholder="어머님" /></View>
+        <View style={{ width: 110 }}><T v="lbl">호칭</T><Input value={f.honorific} onChangeText={(v) => setF({ ...f, honorific: v })} placeholder="어머님" maxLength={12} /></View>
         <Grow><T v="lbl">이름</T><Input value={f.name} onChangeText={(v) => setF({ ...f, name: v })} placeholder="성함" /></Grow>
       </Row>
       <Row style={{ gap: 8 }}>
@@ -28,8 +30,9 @@ export default function Profile() {
       <View><T v="lbl">가장 불편한 것</T><Chips>{PAINS.map((p) => <Chip key={p} big label={p} kind="line" sel={f.pains.includes(p)} onPress={() => setF({ ...f, pains: f.pains.includes(p) ? f.pains.filter((x) => x !== p) : [...f.pains, p] })} />)}</Chips></View>
       <View><T v="lbl">운영자 메모 <T v="cap">상담 통화 뒤 운영자가 적습니다</T></T><Input ro value={rec.opsMemo ?? ''} placeholder="상담 뒤 운영자가 적습니다" multiline /></View>
       <Row><Grow><T b style={{ fontSize: 13.5 }}>사진에 얼굴이 나와도 괜찮아요</T><T v="cap">아니면 손과 화면만 찍습니다</T></Grow><Toggle on={f.photoConsent} onChange={(v) => setF({ ...f, photoConsent: v })} /></Row>
-      <View><T v="lbl">결과 받을 가족</T><Chips>{rec.guardians.map((g) => <Chip key={g.name} big label={`${g.name}${g.relation ? ` (${g.relation})` : ''} · ${g.canPay ? '결제·열람' : g.smsOnly ? '문자' : '열람'}`} kind={g.isPrimary ? 'dark' : 'gray'} />)}<Chip big label="+ 추가" kind="line" onPress={() => r.push('/family/invite')} /></Chips></View>
-      <Btn label="저장하기" disabled={!ok} onPress={save} />
+      <View><T v="lbl">결과 받을 가족</T><Chips>{rec.guardians.map((g) => <Chip key={g.name} big label={`${g.relation === '나' ? (g.name && g.name !== '나' ? `${g.name} (나)` : '나') : `${g.name || '가족'}${g.relation ? ` (${g.relation})` : ''}`} · ${g.canPay ? '결제·열람' : g.smsOnly ? '문자' : '열람'}`} kind={g.isPrimary ? 'dark' : 'gray'} />)}<Chip big label="+ 추가" kind="line" onPress={() => r.push('/family/invite')} /></Chips></View>
+      {!forBooking && <T v="cap">수업 예약에는 시·구, 동, 상세 주소가 필요해요. 지금은 아는 것만 저장해도 됩니다.</T>}
+      <Btn label="저장하기" onPress={save} />
     </Screen>
   );
 }

@@ -23,11 +23,15 @@ export interface State {
   instructors: Instructor[]; payouts: Payout[]; missions: Mission[]; orgs: Org[]; linkedOrgId?: string; gifts: GiftCode[];
   courses: Course[]; enrollments: { courseId: string; at: string; status: 'paid' | 'completed' }[]; certificates: Certificate[]; eligibility: Eligibility;
   helpLog: { kind: string; at: string }[]; tickets: { kind: string; body: string; at: string }[]; toastMsg?: string;
+  /** true = 샘플 데이터(둘러보기·심사 계정). 실제 사용자는 false로 빈 상태에서 시작 */ demo?: boolean;
+  /** 첫 로그인 온보딩을 마쳤거나 건너뛰었는지 */ onboarded?: boolean;
 }
 export interface Actions {
   login: (phone: string, certNo?: string) => { ok: boolean; error?: string };
   loginServer: (r: { phone: string; name: string; roles: string[]; instructor: { name: string; certNo: string } | null }) => void;
   logout: () => void; setMode: (m: Mode) => void; toast: (t?: string) => void; reset: () => void;
+  finishOnboarding: (p: { myName?: string; recipient?: Partial<Recipient> }) => void;
+  applyServerProfile: (p: { name?: string; recipients?: Partial<Recipient>[] }) => void;
   saveRecipient: (id: string, patch: Partial<Recipient>) => void;
   checkout: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], method: PayMethod, extras?: string[]) => Pass;
   requestBooking: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], extras: string[], ticketId?: string) => Pass;
@@ -52,12 +56,39 @@ export interface Actions {
   ticket: (kind: string, body: string) => void; setGuardianPay: (recipientId: string, accountId: string, canPay: boolean) => void;
 }
 
+/** 스토어 심사용 계정. 이 번호만 샘플 데이터로 화면을 채운다. */
+export const REVIEW_PHONE = '01000000001';
+
 const seed = (): State => ({
+  demo: true, onboarded: true,
   loggedIn: false, account: M.account, mode: 'family', instructorId: undefined,
   recipients: M.recipients, passes: M.passes, assignments: M.assignments, sessions: M.sessions, reports: M.reports,
   instructors: M.instructors, payouts: M.payouts, missions: M.missions, orgs: M.orgs, linkedOrgId: 'o1', gifts: M.gifts,
   courses: M.courses, enrollments: [], certificates: [], eligibility: {}, helpLog: [], tickets: [], toastMsg: undefined,
 });
+
+type LoginIn = { phone: string; name: string; roles: string[]; instructor: { name: string; certNo: string } | null };
+const blankRecipient = (accountId: string, myName: string): Recipient => ({
+  id: uid('r'), type: 'senior', name: '', honorific: '부모님', honorificTeacher: '선생님', sigungu: '', dong: '', addressDetail: '', deviceBrand: '', pains: [],
+  guardians: [{ accountId, name: myName || '나', isPrimary: true, canPay: true, canView: true, relation: '나' }],
+});
+const newInstructor = (accountId: string, i: { name: string; certNo: string }): Instructor => {
+  const d = new Date();
+  return { id: 'me', accountId, name: i.name, certNo: i.certNo, issuedAt: now().slice(0, 10), grade: 1, photo: 'teacher', intro: '', sigungu: '', sinceLabel: `${d.getFullYear()}년 ${d.getMonth() + 1}월부터`,
+    stats: { assigned: 0, rebooked: 0, lessons: 0, seniors: 0 }, settings: { enabled: true, dongs: [], weekdays: [], timeslots: [], maxPerWeek: 5 } };
+};
+/** 실제 사용자의 첫 상태: 샘플 없이 빈 상태. 부모님 칸은 비어 있는 한 분(온보딩·어르신 정보에서 채움). */
+const fresh = (r: LoginIn): State => {
+  const accountId = uid('a'); const name = (r.name || '').trim();
+  return {
+    ...seed(), demo: false, onboarded: false, loggedIn: true,
+    account: { id: accountId, phone: r.phone, name, roles: r.roles as Account['roles'], lastMode: r.instructor ? 'instructor' : 'family' },
+    mode: r.instructor ? 'instructor' : 'family', instructorId: r.instructor ? 'me' : undefined,
+    recipients: [blankRecipient(accountId, name)], passes: [], assignments: [], sessions: [], reports: [],
+    instructors: r.instructor ? [newInstructor(accountId, r.instructor)] : [], payouts: [], missions: [], orgs: [], linkedOrgId: undefined, gifts: [],
+    courses: M.courses.filter((c) => c.direct), enrollments: [], certificates: [], eligibility: {}, helpLog: [], tickets: [],
+  };
+};
 
 /** 06-6 정산 계산 */
 export function calcPayout(s: Session, opts: { normal: boolean; earlyEnd?: boolean; noShow?: boolean }): { kind: Payout['kind']; amount: number; note: string; sub?: string }[] {
@@ -102,10 +133,34 @@ export const useStore = create<State & Actions>()(
       },
       loginServer: (r) => {
         const st = get();
-        const instructors = r.instructor ? st.instructors.map((i, k) => (k === 0 ? { ...i, name: r.instructor!.name, certNo: r.instructor!.certNo } : i)) : st.instructors;
-        set({ loggedIn: true, instructorId: r.instructor ? 'i1' : st.instructorId, instructors, account: { ...st.account, phone: r.phone, name: r.name || st.account.name, roles: r.roles as Account['roles'] }, mode: r.instructor ? 'instructor' : st.mode });
+        if (r.phone === REVIEW_PHONE) {
+          const d = seed();
+          const instructors = r.instructor ? d.instructors.map((i, k) => (k === 0 ? { ...i, name: r.instructor!.name, certNo: r.instructor!.certNo } : i)) : d.instructors;
+          set({ ...d, loggedIn: true, instructorId: r.instructor ? 'i1' : undefined, instructors, account: { ...d.account, phone: r.phone, name: r.name || '심사용', roles: r.roles as Account['roles'] }, mode: r.instructor ? 'instructor' : 'family' });
+          return;
+        }
+        // 샘플 상태였거나 다른 번호로 들어오면 빈 상태로 새로 시작
+        if (st.demo !== false || st.account.phone !== r.phone) { set(fresh(r)); return; }
+        const instructors = r.instructor && !st.instructors.some((i) => i.certNo === r.instructor!.certNo) ? [...st.instructors, newInstructor(st.account.id, r.instructor)] : st.instructors;
+        set({ loggedIn: true, instructors, instructorId: r.instructor ? (instructors.find((i) => i.certNo === r.instructor!.certNo)?.id ?? st.instructorId) : st.instructorId,
+          account: { ...st.account, name: r.name || st.account.name, roles: r.roles as Account['roles'] }, mode: r.instructor ? 'instructor' : st.mode });
       },
-      logout: () => set({ loggedIn: false }),
+      finishOnboarding: ({ myName, recipient }) => set((s) => {
+        const name = myName !== undefined ? myName.trim() : s.account.name;
+        const recs = s.recipients.length ? s.recipients : [blankRecipient(s.account.id, name)];
+        return { onboarded: true, account: { ...s.account, name },
+          recipients: recs.map((x, k) => (k === 0 ? { ...x, ...(recipient || {}), guardians: x.guardians.map((g) => (g.relation === '나' ? { ...g, name: name || '나' } : g)) } : x)) };
+      }),
+      applyServerProfile: ({ name, recipients }) => set((s) => {
+        if (s.demo !== false) return {};
+        const acc = name ? { ...s.account, name } : s.account;
+        if (!recipients || !recipients.length) return { account: acc };
+        const base = s.recipients[0] ?? blankRecipient(acc.id, acc.name);
+        const merged = recipients.map((r, k) => ({ ...(k === 0 ? base : blankRecipient(acc.id, acc.name)), ...r } as Recipient));
+        return { account: acc, recipients: merged, onboarded: true };
+      }),
+      // 로그아웃하면 이 기기에 남은 개인 정보를 지운다 (다음 사람이 보지 않게)
+      logout: () => set({ ...seed(), loggedIn: false }),
       setMode: (mode) => set({ mode }),
       toast: (toastMsg) => set({ toastMsg }),
       reset: () => set(seed()),
@@ -266,7 +321,17 @@ export const useStore = create<State & Actions>()(
       ticket: (kind, body) => set((s) => ({ tickets: [...s.tickets, { kind, body, at: now() }] })),
       setGuardianPay: (rid, aid, canPay) => set((s) => ({ recipients: s.recipients.map((r) => (r.id === rid ? { ...r, guardians: r.guardians.map((g) => (g.accountId === aid ? { ...g, canPay } : g)) } : r)) })),
     }),
-    { name: 'kiolearn-app-v3', storage: createJSONStorage(() => AsyncStorage), version: 3, migrate: () => seed() as unknown as State & Actions },
+    { name: 'kiolearn-app-v3', storage: createJSONStorage(() => AsyncStorage), version: 4,
+      // v4 (2026-11-06): 실제 사용자 기기에 남은 샘플 데이터(은희, 김옥순 어머님, 목동 주소 등)를 걷어 낸다.
+      migrate: (ps) => {
+        const o = ps as Partial<State> | undefined;
+        if (o && o.loggedIn && o.account?.phone && o.account.phone !== REVIEW_PHONE && o.account.phone !== M.account.phone) {
+          const ins = o.instructorId ? o.instructors?.find((i) => i.id === o.instructorId) : undefined;
+          const name = o.account.name === M.account.name ? '' : o.account.name || '';
+          return fresh({ phone: o.account.phone, name, roles: o.account.roles as string[], instructor: ins ? { name: ins.name, certNo: ins.certNo } : null }) as unknown as State & Actions;
+        }
+        return seed() as unknown as State & Actions;
+      } },
   ),
 );
 

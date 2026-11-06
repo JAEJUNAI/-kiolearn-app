@@ -5,13 +5,14 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Screen, T, Btn, Input, Box, Chip, Row, Grow, Icon } from '../src/ui';
 import { useStore } from '../src/data/store';
 import { sendOtp, verifyOtp } from '../src/lib/supabase';
+import { pullProfile, acceptPendingInvite } from '../src/lib/profile';
 import { C, F } from '../src/theme';
 
 const fmtPhone = (v: string) => { const d = v.replace(/\D/g, '').slice(0, 11); return d.length > 7 ? `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}` : d.length > 3 ? `${d.slice(0, 3)}-${d.slice(3)}` : d; };
 
 export default function Login() {
   const r = useRouter(); const { invite, as } = useLocalSearchParams<{ invite?: string; as?: string }>();
-  const loginServer = useStore((s) => s.loginServer); const rec = useStore((s) => s.recipients[0]);
+  const loginServer = useStore((s) => s.loginServer);
   const [dev, setDev] = useState(false);
   const [role, setRole] = useState<'family' | 'instructor'>(as === 'instructor' ? 'instructor' : 'family');
   const [phone, setPhone] = useState(''); const [otp, setOtp] = useState(''); const [cert, setCert] = useState(''); const [step, setStep] = useState<'phone' | 'otp'>('phone');
@@ -32,7 +33,11 @@ export default function Login() {
     if (!res.ok || !res.account) { if (/만료|먼저 받아/.test(res.error ?? '')) setSentAt(Date.now() - 61000); return setErr(res.error ?? '번호가 맞지 않아요. 다시 확인해 주세요.'); }
     if (role === 'instructor' && !res.instructor) { setNeedCert(true); return setErr(cert ? '자격번호를 확인해 주세요.' : '처음 강사로 들어오실 때는 자격번호가 필요해요. 한 번 확인되면 다음부터는 묻지 않습니다.'); }
     loginServer({ phone: digits, name: res.account.name, roles: res.account.roles, instructor: res.instructor ?? null });
-    r.replace('/');
+    // 서버에 저장된 내 정보 → 기억해 둔 가족 초대 → 처음이면 온보딩
+    await pullProfile().catch(() => {});
+    const msg = await acceptPendingInvite().catch(() => undefined);
+    const st = useStore.getState(); if (msg) st.toast(msg);
+    r.replace(!st.onboarded && st.mode === 'family' ? '/onboarding' : '/');
   };
 
   return (
@@ -61,7 +66,7 @@ export default function Login() {
         </>
       )}
 
-      {invite && <Box kind="peach" tight><T style={{ fontSize: 13 }}>초대 링크로 들어오셨네요. 인증이 끝나면 <T b>{rec.honorific}({rec.name})</T>이 바로 연결됩니다.</T></Box>}
+      {invite && <Box kind="peach" tight><T style={{ fontSize: 13 }}>가족 초대 링크로 들어오셨네요. 인증이 끝나면 초대한 가족의 부모님 소식이 바로 연결됩니다.</T></Box>}
       {!!err && <T v="cap" style={{ color: C.danger }}>{err}</T>}
 
       {step === 'phone'

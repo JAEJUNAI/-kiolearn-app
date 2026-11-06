@@ -8,7 +8,8 @@ import { fmtDT } from '../../src/lib/fmt';
 
 export default function Certs() {
   const r = useRouter(); const s = useStore(); const e = s.eligibility; const certs = s.certificates;
-  const goSettings = () => { if (!s.account.roles.includes('instructor')) { s.login(s.account.phone, e.certNo ?? 'KL-DC-2026-0588'); } r.replace('/instructor/settings'); };
+  // 실제 사용자: 자격번호는 학습실에서 발급되고, 강사 로그인(자격번호 입력)으로 강사 앱이 열린다.
+  const goSettings = () => { if (s.demo === false && !s.account.roles.includes('instructor')) return r.push({ pathname: '/login', params: { as: 'instructor' } }); if (!s.account.roles.includes('instructor')) { s.login(s.account.phone, e.certNo ?? 'KL-DC-2026-0588'); } r.replace('/instructor/settings'); };
   return (
     <Screen>
       <Nav title="내 수료증" />
@@ -28,7 +29,7 @@ export default function Certs() {
         <KV k={<T b style={{ fontSize: 13.5 }}>출강 가능</T>} sub={e.certNo ? `자격번호 ${e.certNo}` : '서류와 확인 문제를 통과하면 붙습니다'} right={<Chip label={e.eligibleAt ? '배정 대상' : '전'} kind={e.eligibleAt ? 'orange' : 'gray'} />} style={{ paddingVertical: 12 }} />
       </Box>
       <Box tight><T v="sub">출강 가능은 국가자격이 아니라 이 앱 안에서 배정을 받을 수 있다는 표시입니다. 활동 설정을 채우면 요청이 오기 시작합니다.</T></Box>
-      {e.eligibleAt ? <Btn label="활동 설정하러 가기" onPress={goSettings} /> : <Btn label="검증 통과 처리 (개발용)" kind="ghost" disabled={certs.length === 0} onPress={() => s.verifyEligibility()} />}
+      {e.eligibleAt ? <Btn label="활동 설정하러 가기" onPress={goSettings} /> : s.demo !== false ? <Btn label="검증 통과 처리 (개발용)" kind="ghost" disabled={certs.length === 0} onPress={() => s.verifyEligibility()} /> : <Btn label="자격번호가 있어요 · 강사로 들어가기" kind="ghost" onPress={goSettings} />}
       {certs.length > 0 && <Btn label="수료증 PDF" kind="ghost" onPress={() => s.toast('PDF를 준비하면 알려드릴게요.')} />}
       <View style={{ height: 8 }} />
     </Screen>

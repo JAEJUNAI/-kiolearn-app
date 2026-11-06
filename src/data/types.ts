@@ -9,6 +9,7 @@ export interface Recipient {
   id: string; type: 'senior' | 'child'; name: string; honorific: string; honorificTeacher: '선생님' | '도와주러 오는 분';
   sigungu: string; dong: string; addressDetail?: string; deviceBrand?: string; deviceOs?: string; pains: string[];
   opsMemo?: string; consultDoneAt?: string; cohabit?: boolean; photoConsent?: boolean; linkedAccountId?: string; orgId?: string;
+  /** 서버(app_recipients) id. 저장 전에는 없음 */ serverId?: string;
   guardians: { accountId: string; name: string; isPrimary: boolean; canPay: boolean; canView: boolean; smsOnly?: boolean; relation?: string }[];
 }
 

@@ -44,6 +44,56 @@ module.exports = async function handler(req, res) {
     }
 
     // ── 기관 연결 (K1): 기관 코드 조회 → 멤버 등록. 코드는 app_orgs 에 운영자가 발급한다 (예: IC-BPS-2026) ──
+    // ── 내 정보·부모님 정보: 온보딩과 "어르신 정보" 화면이 저장, 로그인 직후 불러온다 ──
+    if (op === 'profile-get') {
+      const links = (await sb(`app_recipient_guardians?select=recipient_id,is_primary,relation&account_id=eq.${acc.id}`)) || [];
+      let recipients = [];
+      if (links.length) recipients = (await sb(`app_recipients?select=*&id=in.(${links.map((l) => l.recipient_id).join(',')})&order=created_at.asc`)) || [];
+      return res.status(200).json({ ok: true, account: { name: acc.name || '' }, recipients: recipients.map((r) => ({ id: r.id, name: r.name || '', honorific: r.honorific || '', sigungu: r.sigungu || '', dong: r.dong || '', addressDetail: r.address_detail || '', deviceBrand: r.device_brand || '', deviceOs: r.device_os || '', pains: r.pains || [], photoConsent: !!r.photo_consent, cohabit: r.cohabit })) });
+    }
+    if (op === 'profile-save') {
+      const clip = (v, n) => String(v == null ? '' : v).trim().slice(0, n);
+      if (body.myName !== undefined) await sb(`app_accounts?id=eq.${acc.id}`, { method: 'PATCH', prefer: 'return=minimal', body: { name: clip(body.myName, 30), updated_at: new Date().toISOString() } });
+      let rid = null;
+      const r = body.recipient;
+      if (r && typeof r === 'object') {
+        const row = { name: clip(r.name, 30), honorific: clip(r.honorific, 12) || '부모님', sigungu: clip(r.sigungu, 40), dong: clip(r.dong, 30), address_detail: clip(r.addressDetail, 120), device_brand: clip(r.deviceBrand, 30), device_os: clip(r.deviceOs, 20), pains: Array.isArray(r.pains) ? r.pains.slice(0, 10).map((x) => clip(x, 20)) : [], photo_consent: !!r.photoConsent, updated_at: new Date().toISOString() };
+        const sid = /^[0-9a-f-]{36}$/i.test(String(r.id || '')) ? r.id : null;
+        const mine = sid ? (await sb(`app_recipient_guardians?select=recipient_id&account_id=eq.${acc.id}&recipient_id=eq.${sid}`))[0] : null;
+        if (mine) { await sb(`app_recipients?id=eq.${sid}`, { method: 'PATCH', prefer: 'return=minimal', body: row }); rid = sid; }
+        else {
+          const ins = await one('app_recipients', { method: 'POST', body: { ...row, created_by: acc.id } }); rid = ins.id;
+          await sb('app_recipient_guardians', { method: 'POST', prefer: 'return=minimal', body: { recipient_id: rid, account_id: acc.id, is_primary: true, can_pay: true, can_view: true, relation: '나' } });
+        }
+      }
+      return res.status(200).json({ ok: true, recipientId: rid });
+    }
+
+    // ── 가족 초대: 대표 보호자가 링크를 만들고(14일), 받은 가족이 로그인하면 같은 부모님에 연결 ──
+    if (op === 'invite-create') {
+      const rid = String(body.recipientId || '');
+      if (!/^[0-9a-f-]{36}$/i.test(rid)) throw err(400, '부모님 정보를 먼저 저장해 주세요.');
+      const mine = (await sb(`app_recipient_guardians?select=recipient_id&account_id=eq.${acc.id}&recipient_id=eq.${rid}`))[0];
+      if (!mine) throw err(403, '이 부모님의 보호자만 초대할 수 있어요.');
+      const abc = 'abcdefghjkmnpqrstuvwxyz23456789'; let token = '';
+      for (let i = 0; i < 10; i++) token += abc[Math.floor(Math.random() * abc.length)];
+      await sb('app_invites', { method: 'POST', prefer: 'return=minimal', body: { token, recipient_id: rid, created_by: acc.id, perms: { can_view: true }, expires_at: new Date(Date.now() + 14 * 864e5).toISOString() } });
+      return res.status(200).json({ ok: true, token, url: `https://app.kiolearn.co.kr/i/${token}` });
+    }
+    if (op === 'invite-accept') {
+      const token = String(body.inviteToken || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+      const inv = token && (await sb(`app_invites?select=*&token=eq.${token}`))[0];
+      if (!inv) throw err(404, '초대 링크를 찾을 수 없어요. 보낸 가족에게 새 링크를 받아 주세요.');
+      if (inv.expires_at && new Date(inv.expires_at) < new Date()) throw err(410, '초대 링크 기한(14일)이 지났어요. 보낸 가족에게 새 링크를 받아 주세요.');
+      const have = (await sb(`app_recipient_guardians?select=recipient_id&account_id=eq.${acc.id}&recipient_id=eq.${inv.recipient_id}`))[0];
+      if (!have) await sb('app_recipient_guardians', { method: 'POST', prefer: 'return=minimal', body: { recipient_id: inv.recipient_id, account_id: acc.id, is_primary: false, can_pay: false, can_view: true, relation: '가족' } });
+      if (!inv.used_at) await sb(`app_invites?token=eq.${token}`, { method: 'PATCH', prefer: 'return=minimal', body: { used_at: new Date().toISOString(), used_by: acc.id } });
+      const r = (await sb(`app_recipients?select=*&id=eq.${inv.recipient_id}`))[0];
+      const from = (await sb(`app_accounts?select=name&id=eq.${inv.created_by}`))[0];
+      await slack(`👪 가족 초대 수락 — ${acc.phone} → ${r ? (r.honorific || '') + ' ' + (r.name || '') : inv.recipient_id} (초대: ${from ? from.name || '' : ''})`);
+      return res.status(200).json({ ok: true, from: from ? from.name || '' : '', recipient: r ? { id: r.id, name: r.name || '', honorific: r.honorific || '', sigungu: r.sigungu || '', dong: r.dong || '', deviceBrand: r.device_brand || '', pains: r.pains || [] } : null });
+    }
+
     if (op === 'org-lookup' || op === 'org-link') {
       const code = String(body.code || '').toUpperCase().replace(/\s/g, ''); if (code.length < 6) throw err(400, '기관 코드를 입력해 주세요.');
       const org = (await sb(`app_orgs?select=id,name,type,code,programs&code=eq.${encodeURIComponent(code)}`))[0];

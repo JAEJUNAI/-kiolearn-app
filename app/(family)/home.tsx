@@ -16,7 +16,7 @@ export default function Home() {
   const last = sel.reportsOf(s, rec.id)[0]; const teacher = s.instructors.find((i) => i.id === next?.instructorId) ?? s.instructors[0];
   const [, tick] = useState(0); useEffect(() => { const t = setInterval(() => tick((x) => x + 1), 30000); return () => clearInterval(t); }, []);
 
-  const greet = <T v="cap">안녕하세요, {s.account.name} 님</T>;
+  const greet = <T v="cap">{s.account.name ? `안녕하세요, ${s.account.name} 님` : '안녕하세요'}</T>;
   const nameLine = `${rec.honorific} 수업`;
 
   // 상태: 어르신 미등록 / 입금 확인 중 / 배정 중 / 예정·진행 / 소진
@@ -61,7 +61,7 @@ export default function Home() {
           <KV k="상품" v={`${PRODUCTS[pass.product].name} · ${won(pass.price)}`} />
         </Box>
         {pending
-          ? <Box tight><T v="sub">{pass.method === 'vaccount' ? '가상계좌' : '법인 계좌'}로 3일 안에 입금해 주세요. 입금이 확인되면 알려드립니다.</T><Btn label="입금했어요 (개발용 확인)" kind="ghost" size="sm" style={{ marginTop: 10, alignSelf: 'flex-start' }} onPress={() => s.confirmDeposit(pass.id)} /></Box>
+          ? <Box tight><T v="sub">{pass.method === 'vaccount' ? '가상계좌' : '법인 계좌'}로 3일 안에 입금해 주세요. 입금이 확인되면 알려드립니다.</T>{s.demo !== false && <Btn label="입금했어요 (개발용 확인)" kind="ghost" size="sm" style={{ marginTop: 10, alignSelf: 'flex-start' }} onPress={() => s.confirmDeposit(pass.id)} />}</Box>
           : <Box tight><T v="sub">조건에 맞는 강사에게 요청을 보냈습니다. 정해지면 푸시로 알려드리고, 그 전에 운영자가 전화로 한 번 확인합니다.</T></Box>}
         <Box kind="white" tight><Row><Avatar src="teacher3" size={36} /><Grow><T b style={{ fontSize: 13.5 }}>운영자 상담</T><T v="cap">월~금 10:00~18:00 · 전화 연결</T></Grow><Chip label="전화" kind="line" /></Row></Box>
         {over && !pass.promiseExtended && <Btn label="72시간 더 기다리기" kind="soft" onPress={() => s.extendPromise(pass.id)} />}

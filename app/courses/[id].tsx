@@ -22,7 +22,7 @@ export default function CourseDetail() {
       <Box kind="white" style={{ paddingVertical: 2 }}>{c.curriculum.map((x, i) => <KV key={x.k} first={i === 0} k={x.k} v={x.v} />)}</Box>
       <Box tight><T v="sub">{c.note ?? `수료하면 "${c.provider} 과정 수료" 수료증이 앱에 발급됩니다. 서류 3종과 학습실 확인 문제까지 통과하면 출강 가능 표시가 붙고 배정 요청을 받습니다.`}</T></Box>
       <Row><Grow><T v="cap">수강료</T><T v="h" style={{ fontSize: 18 }}>{c.price ? won(c.price) : '무료'}</T></Grow>
-        {en ? <Row><Chip label={en.status === 'completed' ? '수료' : '수강 중'} kind="ok" big />{en.status === 'paid' && <Btn label="수료 처리 (개발용)" kind="ghost" size="sm" onPress={() => { s.completeCourse(c.id); r.push('/courses/certs'); }} />}</Row> : <Btn label={c.price ? '수강 신청' : '학습실 열기'} style={{ paddingHorizontal: 28 }} onPress={enroll} />}
+        {en ? <Row><Chip label={en.status === 'completed' ? '수료' : '수강 중'} kind="ok" big />{en.status === 'paid' && s.demo !== false && <Btn label="수료 처리 (개발용)" kind="ghost" size="sm" onPress={() => { s.completeCourse(c.id); r.push('/courses/certs'); }} />}</Row> : <Btn label={c.price ? '수강 신청' : '학습실 열기'} style={{ paddingHorizontal: 28 }} onPress={enroll} />}
       </Row>
       <T v="fine">{c.direct ? '키오런이 직접 운영하는 과정입니다.' : '심사를 거친 파트너 기관입니다. 환불은 첫 회 전까지 전액, 이후 기관 규정에 따릅니다.'}</T>
     </Screen>

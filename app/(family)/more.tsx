@@ -30,7 +30,7 @@ export default function More() {
   };
   return (
     <Screen>
-      <Row><Avatar src={s.account.photo ?? 'teacher3'} size={48} /><Grow><T v="h" style={{ fontSize: 16 }}>{s.account.name} 님</T><T v="cap">010-{s.account.phone.slice(3, 7)}-**** · {rec.honorific} 1명 연결</T></Grow>
+      <Row><Avatar src={s.account.photo ?? 'teacher3'} size={48} /><Grow><T v="h" style={{ fontSize: 16 }}>{s.account.name ? `${s.account.name} 님` : '이름을 적어 주세요'}</T><T v="cap">010-{s.account.phone.slice(3, 7)}-**** · {rec.honorific} 1명 연결</T></Grow>
         {roles.includes('instructor') && <Chip label="강사 모드" kind="line" big onPress={() => { s.setMode('instructor'); r.replace('/(instructor)/today'); }} />}
       </Row>
       <Row style={{ gap: 8 }}>
@@ -54,7 +54,7 @@ export default function More() {
         <KV k="활동 모드로 보기 (부모님 폰)" onPress={() => { s.setMode('senior'); r.replace('/(senior)/today'); }} style={{ paddingVertical: 12 }} />
         <KV k="로그아웃" onPress={() => { setToken(''); s.logout(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
         <KV k={<T style={{ color: C.danger, fontSize: 13.5 }}>계정 삭제</T>} onPress={del} style={{ paddingVertical: 12 }} />
-        <KV k={<T v="cap">개발용: 데이터 초기화</T>} onPress={() => { s.reset(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />
+        {s.demo !== false && <KV k={<T v="cap">개발용: 데이터 초기화</T>} onPress={() => { s.reset(); r.replace('/login'); }} style={{ paddingVertical: 12 }} />}
       </Box>
       <View style={{ height: 10 }} />
     </Screen>
