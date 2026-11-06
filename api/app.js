@@ -69,6 +69,14 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, recipientId: rid });
     }
 
+    if (op === 'recipient-remove') {
+      const rid = String(body.recipientId || ''); if (!/^[0-9a-f-]{36}$/i.test(rid)) throw err(400, 'recipientId');
+      await sb(`app_recipient_guardians?account_id=eq.${acc.id}&recipient_id=eq.${rid}`, { method: 'DELETE', prefer: 'return=minimal' });
+      const left = (await sb(`app_recipient_guardians?select=account_id&recipient_id=eq.${rid}`)) || [];
+      if (!left.length) await sb(`app_recipients?id=eq.${rid}`, { method: 'DELETE', prefer: 'return=minimal' });
+      return res.status(200).json({ ok: true });
+    }
+
     // ── 가족 초대: 대표 보호자가 링크를 만들고(14일), 받은 가족이 로그인하면 같은 부모님에 연결 ──
     if (op === 'invite-create') {
       const rid = String(body.recipientId || '');

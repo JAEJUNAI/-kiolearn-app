@@ -8,6 +8,7 @@ import { PRODUCTS, Product, PayMethod, Pass } from '../../src/data/types';
 import { fmtDT, won, ymd } from '../../src/lib/fmt';
 import { C, F } from '../../src/theme';
 import { api } from '../../src/lib/supabase';
+import { RecipientBar, recipientLabel } from '../../src/components/RecipientBar';
 
 const LIVE_PAY = false; // 토스페이먼츠 결제창 연결 뒤 true. 그 전에는 예약 요청 → 운영자 전화 → 결제 링크
 
@@ -56,7 +57,9 @@ export default function Book() {
 
   return (
     <Screen>
-      <T v="ttl" style={{ fontSize: 21 }}>{gift ? '효도권으로 시작합니다' : '어떤 구성으로 시작할까요'}</T>
+      {s.recipients.length > 1 && <View style={{ gap: 4 }}><T v="lbl">누구 수업인가요</T><RecipientBar hideAdd /></View>}
+      <T v="ttl" style={{ fontSize: 21 }}>{gift ? '효도권으로 시작합니다' : `${recipientLabel(rec)}
+어떤 구성으로 시작할까요`}</T>
       {!rec.addressDetail && <Box kind="peach" tight><T style={{ fontSize: 13 }}>결제 전에 {rec.honorific} 상세 주소가 필요해요. </T><Btn label="어르신 정보 적기" size="sm" kind="ghost" style={{ alignSelf: 'flex-start', marginTop: 8 }} onPress={() => r.push('/family/profile')} /></Box>}
       {!gift && (
         <>

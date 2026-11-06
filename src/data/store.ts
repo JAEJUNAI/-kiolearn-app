@@ -25,6 +25,7 @@ export interface State {
   helpLog: { kind: string; at: string }[]; tickets: { kind: string; body: string; at: string }[]; toastMsg?: string;
   /** true = 샘플 데이터(둘러보기·심사 계정). 실제 사용자는 false로 빈 상태에서 시작 */ demo?: boolean;
   /** 첫 로그인 온보딩을 마쳤거나 건너뛰었는지 */ onboarded?: boolean;
+  /** 지금 보고 있는 어르신 (양가 부모님 등 여러 분일 때) */ curRecipientId?: string;
 }
 export interface Actions {
   login: (phone: string, certNo?: string) => { ok: boolean; error?: string };
@@ -32,6 +33,7 @@ export interface Actions {
   logout: () => void; setMode: (m: Mode) => void; toast: (t?: string) => void; reset: () => void;
   finishOnboarding: (p: { myName?: string; recipient?: Partial<Recipient> }) => void;
   applyServerProfile: (p: { name?: string; recipients?: Partial<Recipient>[] }) => void;
+  addRecipient: () => string; selectRecipient: (id: string) => void; removeRecipient: (id: string) => { ok: boolean; error?: string };
   saveRecipient: (id: string, patch: Partial<Recipient>) => void;
   checkout: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], method: PayMethod, extras?: string[]) => Pass;
   requestBooking: (recipientId: string, product: Product, slot1: Pass['slot1'], slot2: Pass['slot2'], extras: string[], ticketId?: string) => Pass;
@@ -155,10 +157,22 @@ export const useStore = create<State & Actions>()(
         if (s.demo !== false) return {};
         const acc = name ? { ...s.account, name } : s.account;
         if (!recipients || !recipients.length) return { account: acc };
-        const base = s.recipients[0] ?? blankRecipient(acc.id, acc.name);
-        const merged = recipients.map((r, k) => ({ ...(k === 0 ? base : blankRecipient(acc.id, acc.name)), ...r } as Recipient));
-        return { account: acc, recipients: merged, onboarded: true };
+        // 서버에 있는 분들 + 아직 서버에 안 올라간 이 기기의 분(이름이나 주소가 있는 경우)
+        const local = s.recipients.filter((x) => !x.serverId && (x.name || x.sigungu));
+        const merged = recipients.map((r) => { const mine = s.recipients.find((x) => x.serverId === r.serverId); return { ...(mine ?? blankRecipient(acc.id, acc.name)), ...r } as Recipient; });
+        const all = [...merged, ...local];
+        return { account: acc, recipients: all, onboarded: true, curRecipientId: all.some((x) => x.id === s.curRecipientId) ? s.curRecipientId : all[0].id };
       }),
+      addRecipient: () => { const st = get(); const nr = blankRecipient(st.account.id, st.account.name); set({ recipients: [...st.recipients, nr], curRecipientId: nr.id }); return nr.id; },
+      selectRecipient: (id) => set({ curRecipientId: id }),
+      removeRecipient: (id) => {
+        const st = get();
+        if (st.recipients.length <= 1) return { ok: false, error: '한 분은 남아 있어야 해요. 정보만 지우시려면 칸을 비우고 저장해 주세요.' };
+        if (st.passes.some((p) => p.recipientId === id && ['requested', 'paid', 'active', 'pending_deposit'].includes(p.status))) return { ok: false, error: '진행 중인 예약이나 남은 회차가 있어서 지울 수 없어요.' };
+        const rest = st.recipients.filter((x) => x.id !== id);
+        set({ recipients: rest, curRecipientId: rest[0].id });
+        return { ok: true };
+      },
       // 로그아웃하면 이 기기에 남은 개인 정보를 지운다 (다음 사람이 보지 않게)
       logout: () => set({ ...seed(), loggedIn: false }),
       setMode: (mode) => set({ mode }),
@@ -337,13 +351,14 @@ export const useStore = create<State & Actions>()(
 
 // ---------- 파생값 ----------
 export const sel = {
-  myRecipient: (s: State) => s.recipients[0],
+  myRecipient: (s: State) => s.recipients.find((r) => r.id === s.curRecipientId) ?? s.recipients[0],
   activePass: (s: State, rid: string) => s.passes.find((p) => p.recipientId === rid && ['paid', 'active', 'pending_deposit', 'requested'].includes(p.status)),
   usedCount: (s: State, rid: string) => s.sessions.filter((x) => x.recipientId === rid && ['done', 'submitted'].includes(x.status)).length,
   totalBought: (s: State, rid: string) => s.passes.filter((p) => p.recipientId === rid && !['draft', 'cancelled', 'refunded', 'pending_deposit'].includes(p.status)).reduce((a, p) => a + p.total, 0),
   nextSession: (s: State, rid: string) => s.sessions.filter((x) => x.recipientId === rid && ['scheduled', 'confirmed', 'departed', 'arrived', 'in_progress', 'submitted'].includes(x.status)).sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))[0],
   reportsOf: (s: State, rid: string) => s.reports.filter((r) => r.recipientId === rid).sort((a, b) => b.seq - a.seq),
-  me: (s: State) => s.instructors.find((i) => i.id === s.instructorId) ?? s.instructors[0],
+  // 강사 정보가 아직 없으면(자격번호 미확인 등) 빈 강사로 화면이 깨지지 않게 한다
+  me: (s: State) => s.instructors.find((i) => i.id === s.instructorId) ?? s.instructors[0] ?? newInstructor(s.account.id, { name: s.account.name || '강사', certNo: '' }),
   myAssignments: (s: State) => s.assignments.filter((a) => a.instructorId === (s.instructorId ?? 'i1') && a.status === 'requested' && new Date(a.expiresAt) > new Date()),
   mySessions: (s: State) => s.sessions.filter((x) => x.instructorId === (s.instructorId ?? 'i1')),
   grade: (lessons: number) => (lessons >= RULES.gradeLessons[2] ? 3 : lessons >= RULES.gradeLessons[1] ? 2 : 1) as 1 | 2 | 3,

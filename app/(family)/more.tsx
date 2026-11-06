@@ -7,6 +7,7 @@ import { useStore, sel } from '../../src/data/store';
 import { C } from '../../src/theme';
 import { Alert as RNAlert } from 'react-native';
 import { setToken, api } from '../../src/lib/supabase';
+import { recipientLabel } from '../../src/components/RecipientBar';
 
 export default function More() {
   const r = useRouter(); const s = useStore(); const rec = sel.myRecipient(s);
@@ -30,7 +31,7 @@ export default function More() {
   };
   return (
     <Screen>
-      <Row><Avatar src={s.account.photo ?? 'teacher3'} size={48} /><Grow><T v="h" style={{ fontSize: 16 }}>{s.account.name ? `${s.account.name} 님` : '이름을 적어 주세요'}</T><T v="cap">010-{s.account.phone.slice(3, 7)}-**** · {rec.honorific} 1명 연결</T></Grow>
+      <Row><Avatar src={s.account.photo ?? 'teacher3'} size={48} /><Grow><T v="h" style={{ fontSize: 16 }}>{s.account.name ? `${s.account.name} 님` : '이름을 적어 주세요'}</T><T v="cap">010-{s.account.phone.slice(3, 7)}-**** · 어르신 {s.recipients.length}명</T></Grow>
         {roles.includes('instructor') && <Chip label="강사 모드" kind="line" big onPress={() => { s.setMode('instructor'); r.replace('/(instructor)/today'); }} />}
       </Row>
       <Row style={{ gap: 8 }}>
@@ -44,7 +45,8 @@ export default function More() {
         <KV k="영수증 · 결제 내역" onPress={() => s.toast('결제 내역은 토스페이먼츠 영수증으로 열립니다.')} style={{ paddingVertical: 12 }} />
         <KV k="가족 초대 · 권한" onPress={() => r.push('/family/invite')} style={{ paddingVertical: 12 }} />
         <KV k={<T b style={{ fontSize: 13.5 }}>강사 변경 요청</T>} sub="운영자가 전화로 사정을 듣고 바꿔드려요" onPress={change} style={{ paddingVertical: 12 }} />
-        <KV k="어르신 정보 수정" onPress={() => r.push('/family/profile')} style={{ paddingVertical: 12 }} />
+        {s.recipients.map((x) => <KV key={x.id} k={`어르신 정보 · ${recipientLabel(x)}`} sub={x.addressDetail ? `${x.sigungu} ${x.dong}` : '주소 미입력'} onPress={() => { s.selectRecipient(x.id); r.push('/family/profile'); }} style={{ paddingVertical: 12 }} />)}
+        <KV k="+ 어르신 추가" sub="양가 부모님 등 여러 분을 등록할 수 있어요" onPress={() => { s.addRecipient(); r.push({ pathname: '/family/profile', params: { new: '1' } }); }} style={{ paddingVertical: 12 }} />
         {!roles.includes('instructor') && <KV k={<T b style={{ fontSize: 13.5 }}>강사 자격번호 등록</T>} sub="학습실에서 받은 KL-DC-… 번호" onPress={() => setCertOpen(!certOpen)} style={{ paddingVertical: 12 }} />}
         {certOpen && <View style={{ paddingVertical: 8, gap: 8 }}><Input value={certInput} onChangeText={(v) => setCertInput(v.toUpperCase())} placeholder="KL-DC-2026-0000" autoCapitalize="characters" /><Btn label="등록" size="sm" disabled={certInput.length < 10 || certBusy} onPress={claim} style={{ alignSelf: 'flex-end' }} /></View>}
         <KV k="배우고, 일로 잇기 (과정)" onPress={() => r.push('/courses')} style={{ paddingVertical: 12 }} />

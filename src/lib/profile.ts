@@ -1,6 +1,6 @@
 // 내 정보·부모님 정보를 서버와 맞춘다. 심사 계정(샘플 데이터)에서는 아무것도 보내지 않는다.
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useStore } from '../data/store';
+import { useStore, sel } from '../data/store';
 import { Recipient } from '../data/types';
 import { api, ApiResult } from './supabase';
 
@@ -15,12 +15,19 @@ export async function pullProfile() {
   s.applyServerProfile({ name: out.account?.name || undefined, recipients: (out.recipients || []).map((r) => ({ ...r, serverId: r.id })) });
 }
 
-/** 저장: 내 이름과 첫 번째 부모님. 서버 id를 받아 두면 다음 저장은 같은 줄을 고친다. */
-export async function pushProfile(opts: { myName?: string } = {}) {
+/** 저장: 내 이름과 지금 보고 있는(또는 지정한) 어르신 한 분. 서버 id를 받아 두면 다음 저장은 같은 줄을 고친다. */
+export async function pushProfile(opts: { myName?: string; recipientId?: string } = {}) {
   const s = useStore.getState(); if (s.demo !== false) return { ok: true };
-  const rec = s.recipients[0];
+  const rec = opts.recipientId ? s.recipients.find((x) => x.id === opts.recipientId) : sel.myRecipient(s);
   const out = (await api('app', { op: 'profile-save', myName: opts.myName, recipient: rec ? { ...rec, id: rec.serverId ?? (UUID.test(rec.id) ? rec.id : undefined) } : undefined })) as ApiResult & { recipientId?: string | null };
   if (out.ok && out.recipientId && rec && rec.serverId !== out.recipientId) s.saveRecipient(rec.id, { serverId: out.recipientId });
+  return out;
+}
+/** 어르신 한 분 삭제: 이 기기에서 지우고, 서버에서는 내 보호자 연결을 끊는다(다른 가족이 없으면 정보도 삭제). */
+export async function deleteRecipient(id: string) {
+  const s = useStore.getState(); const rec = s.recipients.find((x) => x.id === id);
+  const out = s.removeRecipient(id); if (!out.ok) return out;
+  if (s.demo === false && rec?.serverId) await api('app', { op: 'recipient-remove', recipientId: rec.serverId }).catch(() => {});
   return out;
 }
 
@@ -28,8 +35,8 @@ export async function pushProfile(opts: { myName?: string } = {}) {
 export async function createInvite(): Promise<{ ok: boolean; url?: string; error?: string }> {
   const s = useStore.getState();
   if (s.demo !== false) return { ok: true, url: 'https://app.kiolearn.co.kr/i/sample' };
-  let rec = s.recipients[0];
-  if (!rec?.serverId) { await pushProfile(); rec = useStore.getState().recipients[0]; }
+  let rec: Recipient | undefined = sel.myRecipient(s);
+  if (!rec?.serverId) { await pushProfile({ recipientId: rec?.id }); rec = useStore.getState().recipients.find((x) => x.id === rec?.id); }
   if (!rec?.serverId) return { ok: false, error: '부모님 정보를 저장하지 못했어요. 네트워크를 확인해 주세요.' };
   const out = (await api('app', { op: 'invite-create', recipientId: rec.serverId })) as ApiResult & { url?: string };
   return out.ok ? { ok: true, url: out.url } : { ok: false, error: out.error };
@@ -48,6 +55,6 @@ export async function acceptPendingInvite(): Promise<string | undefined> {
   const first = st.recipients[0]; const empty = first && !first.name && !first.serverId;
   const guardian = { accountId: st.account.id, name: st.account.name || '나', isPrimary: false, canPay: false, canView: true, relation: '가족' };
   const linked: Recipient = { id: r.id!, serverId: r.id, type: 'senior', name: r.name || '', honorific: r.honorific || '부모님', honorificTeacher: '선생님', sigungu: r.sigungu || '', dong: r.dong || '', deviceBrand: r.deviceBrand, pains: r.pains || [], guardians: [guardian] };
-  useStore.setState({ recipients: empty ? [linked, ...st.recipients.slice(1)] : [...st.recipients.filter((x) => x.serverId !== r.id), linked], onboarded: true });
+  useStore.setState({ recipients: empty ? [linked, ...st.recipients.slice(1)] : [...st.recipients.filter((x) => x.serverId !== r.id), linked], onboarded: true, curRecipientId: linked.id });
   return `${out.from ? out.from + ' 님이 보낸 ' : ''}초대로 ${linked.honorific}${linked.name ? `(${linked.name})` : ''} 소식을 같이 받습니다.`;
 }

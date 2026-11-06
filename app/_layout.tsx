@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { View, Pressable, Platform, useWindowDimensions, Linking } from 'react-native';
 import { Image } from 'expo-image';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useStore } from '../src/data/store';
 import { T, Btn } from '../src/ui';
+import { setOnExpired, setToken } from '../src/lib/supabase';
 import { C, F } from '../src/theme';
 
 function Toast() {
@@ -76,6 +77,8 @@ function DesktopShell({ children }: { children: React.ReactNode }) {
 
 export default function Root() {
   useShotHook();
+  // 로그인 기간(30일)이 끝나 서버가 401을 주면: 로그아웃하고 로그인 화면으로 (화면상으로만 로그인된 채 실패하지 않게)
+  useEffect(() => { setOnExpired(() => { const st = useStore.getState(); if (!st.loggedIn) return; setToken(''); st.logout(); st.toast('로그인 기간이 끝났어요. 다시 로그인해 주세요.'); router.replace('/login'); }); }, []);
   const { width } = useWindowDimensions();
   const [loaded] = useFonts({
     'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),

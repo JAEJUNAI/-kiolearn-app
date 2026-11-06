@@ -8,6 +8,7 @@ import { fmtDT, remain, won, slotLabel } from '../../src/lib/fmt';
 import { PRODUCTS } from '../../src/data/types';
 import { C, F } from '../../src/theme';
 import { api } from '../../src/lib/supabase';
+import { RecipientBar } from '../../src/components/RecipientBar';
 
 export default function Home() {
   const r = useRouter();
@@ -16,7 +17,8 @@ export default function Home() {
   const last = sel.reportsOf(s, rec.id)[0]; const teacher = s.instructors.find((i) => i.id === next?.instructorId) ?? s.instructors[0];
   const [, tick] = useState(0); useEffect(() => { const t = setInterval(() => tick((x) => x + 1), 30000); return () => clearInterval(t); }, []);
 
-  const greet = <T v="cap">{s.account.name ? `안녕하세요, ${s.account.name} 님` : '안녕하세요'}</T>;
+  // 여러 분(양가 부모님 등)이면 위 띠에서 바꾼다. 한 분이면 띠 없이 인사만.
+  const greet = <View style={{ gap: 6 }}>{s.recipients.length > 1 && <RecipientBar hideAdd />}<T v="cap">{s.account.name ? `안녕하세요, ${s.account.name} 님` : '안녕하세요'}</T></View>;
   const nameLine = `${rec.honorific} 수업`;
 
   // 상태: 어르신 미등록 / 입금 확인 중 / 배정 중 / 예정·진행 / 소진
@@ -71,23 +73,38 @@ export default function Home() {
     );
   }
 
+  // 처음 예약 전: "남은 회차 0회 · 0회째" 대신 첫 예약 안내
+  if (!pass && !s.passes.some((p) => p.recipientId === rec.id)) return (
+    <Screen>
+      {greet}<T v="ttl">{rec.honorific} 첫 수업을{'\n'}예약해 보세요</T>
+      <Tile title="강사가 댁으로 갑니다" text="90분 1:1 수업. 예약 요청을 남기면 운영자가 전화로 상황을 여쭙고 일정을 잡아 드립니다." pad={15} />
+      <Box kind="white">
+        <KV first k="수업" v="90분 · 어르신 댁 1:1" />
+        <KV k="가격" v="1회 79,000원" />
+        <KV k="결과" v="수업마다 사진과 리포트" />
+      </Box>
+      <Btn label="수업 예약하기" onPress={() => r.push('/(family)/book')} />
+      <Btn label="가족 초대하기" kind="ghost" onPress={() => r.push('/family/invite')} />
+    </Screen>
+  );
+
   const exhausted = !pass || pass.remaining === 0;
   const inLesson = next && ['arrived', 'in_progress'].includes(next.status);
   const callFailed = next?.callFailedAt && !next.confirmedAt;
   const promo = pass?.product === 'pass3' && used >= 2;
   return (
     <Screen>
-      <Row><Grow>{greet}<T v="ttl">{nameLine}{'\n'}{used}회째 진행 중</T></Grow><Pressable onPress={() => r.push('/family/profile')}><Avatar src={teacher.photo} /></Pressable></Row>
+      <Row><Grow>{greet}<T v="ttl">{nameLine}{'\n'}{used}회째 진행 중</T></Grow><Pressable onPress={() => r.push('/family/profile')}><Avatar src={teacher?.photo ?? 'teacher3'} /></Pressable></Row>
       {exhausted
         ? <Tile dark title="남은 회차 0회" text={`지금까지 ${used}회. 이어가시면 같은 강사가 계속 갑니다.`} />
         : <Tile title={'원하시는 날짜에\n강사가 갑니다'} text="결제 뒤 72시간 안에 첫 일정이 정해집니다. 안 되면 전액 환불." pad={15} />}
-      {callFailed && <Box kind="peach" tight><T style={{ fontSize: 13 }}>{teacher.name} 강사가 {rec.honorific}과 통화가 안 됩니다. 한 번 연락 부탁드려요.</T></Box>}
+      {callFailed && <Box kind="peach" tight><T style={{ fontSize: 13 }}>{teacher?.name ?? '담당'} 강사가 {rec.honorific}과 통화가 안 됩니다. 한 번 연락 부탁드려요.</T></Box>}
       {next && (
         <Pressable onPress={() => !inLesson && r.push(`/family/reschedule/${next.id}`)}>
           <Box kind="white" tight>
             {inLesson
               ? <Row><Grow><T v="cap">지금 수업 중</T><T v="h">{fmtDT(next.arrivedAt!)} 도착</T><T v="cap">끝나면 리포트가 옵니다</T></Grow><Chip label="수업 중" kind="dark" /></Row>
-              : <Row><Grow><T v="cap">다음 수업</T><T v="h">{fmtDT(next.scheduledAt)}</T><T v="cap">{teacher.name} 강사 · {next.topic}</T></Grow><Chip label={next.status === 'confirmed' ? '전날 통화 완료' : next.status === 'departed' ? '출발' : next.status === 'submitted' ? '리포트 작성 중' : '배정 완료'} /></Row>}
+              : <Row><Grow><T v="cap">다음 수업</T><T v="h">{fmtDT(next.scheduledAt)}</T><T v="cap">{teacher?.name ?? '담당'} 강사 · {next.topic}</T></Grow><Chip label={next.status === 'confirmed' ? '전날 통화 완료' : next.status === 'departed' ? '출발' : next.status === 'submitted' ? '리포트 작성 중' : '배정 완료'} /></Row>}
           </Box>
         </Pressable>
       )}

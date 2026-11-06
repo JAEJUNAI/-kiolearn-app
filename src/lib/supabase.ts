@@ -19,12 +19,17 @@ export async function setToken(t: string) { try { if (t) await AsyncStorage.setI
 export interface ApiResult<T = Record<string, unknown>> { ok: boolean; error?: string; dev?: boolean; data?: T; [k: string]: unknown }
 
 /** 서버 API 호출. path 는 'auth' | 'app' 처럼 함수 이름, body.op 로 동작을 고른다. */
+/** 401(로그인 만료) 때 부를 함수. _layout에서 로그아웃 + 로그인 화면 이동을 넣는다. */
+let onExpired: (() => void) | undefined;
+export const setOnExpired = (fn: () => void) => { onExpired = fn; };
+
 export async function api<T = Record<string, unknown>>(path: string, body: Record<string, unknown>): Promise<ApiResult<T>> {
   try {
     const token = await getToken();
     const res = await fetch(`${API_BASE}/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: token ? `Bearer ${token}` : '' }, body: JSON.stringify({ ...body, token }) });
     const j = (await res.json().catch(() => ({}))) as ApiResult<T>;
     if (!res.ok && !j.error) j.error = `서버 오류 (${res.status})`;
+    if (res.status === 401 && path === 'app') { j.error = '로그인 기간이 끝났어요. 다시 로그인해 주세요.'; onExpired?.(); }
     return j;
   } catch (e) {
     return { ok: false, error: '서버에 연결하지 못했어요. 네트워크를 확인해 주세요.' };
