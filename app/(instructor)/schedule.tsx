@@ -15,8 +15,8 @@ export default function Schedule() {
   const days = Array.from({ length: 7 }, (_, i) => { const x = new Date(base); x.setDate(x.getDate() + i); return x; });
   const mine = sel.mySessions(s); const todayKey = ymd(new Date());
   const selSes = mine.find((x) => x.id === selId);
-  const cancel = () => { if (!selSes) return; const o = s.cancelSession(selSes.id, 'instructor'); if (!o.ok) return Alert.alert('취소할 수 없어요', o.error); s.toast('취소했어요. 같은 조건 강사에게 다시 요청됩니다.'); setSelId(undefined); };
-  const change = () => { if (!selSes) return; s.toast('변경 요청을 보호자에게 보냈어요. 승인되면 바뀝니다.'); setSelId(undefined); };
+  const cancel = () => { if (!selSes) return; const o = s.cancelSession(selSes.id, 'instructor'); if (!o.ok) return Alert.alert('취소할 수 없어요', o.error); s.toast('취소했어요. 같은 조건 강사에게 다시 요청이 가요.'); setSelId(undefined); };
+  const change = () => { if (!selSes) return; s.toast('변경 요청을 보호자에게 보냈어요. 승인되면 바뀌어요.'); setSelId(undefined); };
   return (
     <Screen>
       <Row><T v="ttl">{off === 0 ? '이번 주' : off === 1 ? '다음 주' : off === -1 ? '지난 주' : `${off > 0 ? '+' : ''}${off}주`}</T><Grow /><Chip label="‹" kind="line" big onPress={() => setOff(off - 1)} /><Chip label={`${days[0].getMonth() + 1}월 ${days[0].getDate()}일 ~ ${days[6].getDate()}일`} kind="line" big onPress={() => setOff(0)} /><Chip label="›" kind="line" big onPress={() => setOff(off + 1)} /></Row>
@@ -32,7 +32,7 @@ export default function Schedule() {
             </Pressable>); });
         })}
       </View>
-      <Box tight><T v="sub">취소는 24시간 전까지. 그 뒤에는 운영자에게 전화로 말씀해 주세요. 변경 요청은 보호자가 승인해야 바뀝니다.</T></Box>
+      <Box tight><T v="sub">취소는 24시간 전까지. 그 뒤에는 운영자에게 전화로 말씀해 주세요. 변경 요청은 보호자가 승인해야 바뀌어요.</T></Box>
       <Row><Btn label="변경 요청" kind="ghost" size="sm" grow disabled={!selSes || !['scheduled', 'confirmed'].includes(selSes.status)} onPress={change} /><Btn label="취소" kind="ghost" size="sm" grow disabled={!selSes || !['scheduled', 'confirmed'].includes(selSes.status)} onPress={cancel} /></Row>
       {selSes && ['in_progress', 'submitted'].includes(selSes.status) && <Btn label="리포트로 가기" size="sm" onPress={() => r.push(`/instructor/report/${selSes.id}`)} />}
     </Screen>

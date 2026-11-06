@@ -58,3 +58,13 @@ export async function acceptPendingInvite(): Promise<string | undefined> {
   useStore.setState({ recipients: empty ? [linked, ...st.recipients.slice(1)] : [...st.recipients.filter((x) => x.serverId !== r.id), linked], onboarded: true, curRecipientId: linked.id });
   return `${out.from ? out.from + ' 님이 보낸 ' : ''}초대로 ${linked.honorific}${linked.name ? `(${linked.name})` : ''} 소식을 같이 받습니다.`;
 }
+
+/** 운영자에게 알릴 일(강사 변경, 도움 요청, 아쉬운 점 등)을 서버 티켓으로 보낸다. 슬랙으로 운영자에게 바로 간다.
+ *  심사 계정(샘플)은 보내지 않고 성공으로 처리한다. */
+export async function sendTicket(kind: string, body: string, ref = ''): Promise<{ ok: boolean; error?: string }> {
+  const s = useStore.getState(); s.ticket(kind, body);
+  if (s.demo !== false) return { ok: true };
+  const who = sel.myRecipient(s); const head = who ? `[${who.honorific}${who.name ? ' ' + who.name : ''} · ${who.sigungu || ''} ${who.dong || ''}] ` : '';
+  const out = await api('app', { op: 'ticket', kind, ref, body: head + body });
+  return out.ok ? { ok: true } : { ok: false, error: out.error || '보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.' };
+}

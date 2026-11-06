@@ -8,17 +8,18 @@ import { C } from '../../src/theme';
 import { Alert as RNAlert } from 'react-native';
 import { setToken, api } from '../../src/lib/supabase';
 import { recipientLabel } from '../../src/components/RecipientBar';
+import { sendTicket } from '../../src/lib/profile';
 
 export default function More() {
   const r = useRouter(); const s = useStore(); const rec = sel.myRecipient(s);
   const [n1, setN1] = useState(true); const [n2, setN2] = useState(true);
-  const change = () => Alert.alert('강사 변경 요청', '사유를 골라 주세요. 강사에게는 알리지 않습니다.', [
+  const change = () => Alert.alert('강사 변경 요청', '사유를 골라 주세요. 강사에게는 알리지 않아요.', [
     { text: '성격이 안 맞음', onPress: () => done('성격') }, { text: '시간이 안 맞음', onPress: () => done('시간') }, { text: '기타', onPress: () => done('기타') }, { text: '취소', style: 'cancel' }]);
-  const done = (why: string) => { s.ticket('change_instructor', why); s.toast('운영자가 1영업일 안에 전화드립니다.'); };
+  const done = async (why: string) => { const out = await sendTicket('change_instructor', `강사 변경 요청 · 사유: ${why}`); s.toast(out.ok ? '요청을 받았어요. 운영자가 1영업일 안에 전화드릴게요.' : out.error!); };
   const del = () => {
     const active = s.passes.some((p) => p.recipientId === rec.id && ['paid', 'active'].includes(p.status) && p.remaining > 0);
     if (active) return Alert.alert('남은 회차가 있어요', '환불하거나 다른 가족에게 양도한 뒤 삭제할 수 있어요.');
-    Alert.alert('계정을 삭제할까요', '30일 뒤 완전히 지워집니다.', [{ text: '아니오' }, { text: '삭제', style: 'destructive', onPress: () => { api('auth', { op: 'delete' }); setToken(''); s.logout(); r.replace('/login'); } }]);
+    Alert.alert('계정을 삭제할까요', '30일 뒤 완전히 지워져요.', [{ text: '아니오' }, { text: '삭제', style: 'destructive', onPress: async () => { const out = s.demo === false ? await api('auth', { op: 'delete' }) : { ok: true }; if (!out.ok) return Alert.alert('삭제하지 못했어요', (out as { error?: string }).error ?? '인터넷 연결을 확인하고 다시 해 주세요.'); setToken(''); s.logout(); s.toast('계정 삭제를 접수했어요. 30일 뒤 완전히 지워져요.'); r.replace('/login'); } }]);
   };
   const roles = s.account.roles;
   const [certInput, setCertInput] = useState(''); const [certOpen, setCertOpen] = useState(false); const [certBusy, setCertBusy] = useState(false);
@@ -27,7 +28,7 @@ export default function More() {
     setCertBusy(false);
     if (!out.ok || !out.instructor) return RNAlert.alert('등록할 수 없어요', out.error ?? '자격번호를 확인해 주세요.');
     s.loginServer({ phone: s.account.phone, name: s.account.name, roles: (out.account?.roles as string[]) ?? [...roles, 'instructor'], instructor: out.instructor });
-    setCertOpen(false); s.toast('강사 자격이 등록됐어요. 강사 모드로 열립니다.'); r.replace('/(instructor)/today');
+    setCertOpen(false); s.toast('강사 자격이 등록됐어요. 강사 모드로 열려요.'); r.replace('/(instructor)/today');
   };
   return (
     <Screen>
@@ -42,7 +43,7 @@ export default function More() {
       <Box kind="white" style={{ paddingVertical: 2 }}>
         <KV first k="리포트 도착 알림" right={<Toggle on={n1} onChange={setN1} />} style={{ paddingVertical: 12 }} />
         <KV k="수업 전날 안내" right={<Toggle on={n2} onChange={setN2} />} style={{ paddingVertical: 12 }} />
-        <KV k="영수증 · 결제 내역" onPress={() => s.toast('결제 내역은 토스페이먼츠 영수증으로 열립니다.')} style={{ paddingVertical: 12 }} />
+        <KV k="영수증 · 결제 내역" onPress={() => s.toast('결제 내역은 토스페이먼츠 영수증으로 열려요.')} style={{ paddingVertical: 12 }} />
         <KV k="가족 초대 · 권한" onPress={() => r.push('/family/invite')} style={{ paddingVertical: 12 }} />
         <KV k={<T b style={{ fontSize: 13.5 }}>강사 변경 요청</T>} sub="운영자가 전화로 사정을 듣고 바꿔드려요" onPress={change} style={{ paddingVertical: 12 }} />
         {s.recipients.map((x) => <KV key={x.id} k={`어르신 정보 · ${recipientLabel(x)}`} sub={x.addressDetail ? `${x.sigungu} ${x.dong}` : '주소 미입력'} onPress={() => { s.selectRecipient(x.id); r.push('/family/profile'); }} style={{ paddingVertical: 12 }} />)}

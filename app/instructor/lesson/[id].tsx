@@ -18,7 +18,7 @@ export default function Lesson() {
   const rec = s.recipients.find((x) => x.id === ses.recipientId)!; const card = lessonCard(ses.seq, ses.topic, rec.deviceBrand);
   const elapsed = ses.arrivedAt ? Math.floor((Date.now() - new Date(ses.arrivedAt).getTime()) / 60000) : 0;
   const nowIdx = checks.findIndex((c) => !c);
-  const emergency = () => Alert.alert('비상', '운영자에게 바로 전화를 겁니다. 위협이나 급한 상황이면 먼저 자리를 피하세요.', [{ text: '닫기', style: 'cancel' }, { text: '전화 걸기', style: 'destructive', onPress: () => { s.ticket('emergency', ses.id); Linking.openURL('tel:01038715430').catch(() => {}); } }]);
+  const emergency = () => Alert.alert('비상', '운영자에게 바로 전화를 걸어요. 위협이나 급한 상황이면 먼저 자리를 피하세요.', [{ text: '닫기', style: 'cancel' }, { text: '전화 걸기', style: 'destructive', onPress: () => { s.ticket('emergency', ses.id); Linking.openURL('tel:01038715430').catch(() => {}); } }]);
   return (
     <Screen>
       <Nav title={`${ses.seq}회차 · ${ses.topic}`} right={<Chip label="비상" kind="danger" onPress={emergency} />} />

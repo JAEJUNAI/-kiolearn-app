@@ -18,12 +18,12 @@ export default function Gift() {
   const who = `${rec.honorific}${rec.name ? ` (${rec.name})` : ''}`;
   // 실제 사용자: 효도권 서버 검증이 붙기 전까지는 코드를 운영자에게 보내고 확인 뒤 충전한다.
   const real = s.demo === false; const codeOk = /^[A-Z0-9]{3}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code);
-  const sendCode = async () => { const out = await api('app', { op: 'ticket', kind: 'gift_code', ref: code, body: `효도권 코드 ${code} · 충전 대상 ${who}` }); if (!out.ok) return setErr(out.error || '보내지 못했어요. 잠시 뒤 다시 시도해 주세요.'); s.toast('코드를 받았어요. 운영자가 확인하고 충전해 드립니다.'); r.back(); };
+  const sendCode = async () => { const out = await api('app', { op: 'ticket', kind: 'gift_code', ref: code, body: `효도권 코드 ${code} · 충전 대상 ${who}` }); if (!out.ok) return setErr(out.error || '보내지 못했어요. 잠시 뒤 다시 시도해 주세요.'); s.toast('코드를 받았어요. 운영자가 확인하고 충전해 드릴게요.'); r.back(); };
   const redeem = () => { const o = s.redeemGift(code, rec.id); if (!o.ok) return setErr(o.error!); s.toast(`${PRODUCTS[o.pass!.product].total}회가 충전됐어요. 희망 일정을 골라 주세요.`); r.replace({ pathname: '/(family)/book', params: { passId: o.pass!.id } }); };
   return (
     <Screen>
       <Nav title="효도권 등록" />
-      <Tile title={'회사에서 받은\n부모님 디지털 효도권'} text={`코드를 넣으면 회차가 ${rec.honorific}께 충전됩니다.`} obj="icGift" />
+      <Tile title={'회사에서 받은\n부모님 디지털 효도권'} text={`코드를 넣으면 회차가 ${rec.honorific}께 충전돼요.`} obj="icGift" />
       <View><T v="lbl">효도권 코드</T><Input value={code} onChangeText={(v) => { setCode(fmtCode(v)); setErr(''); }} placeholder="KIO-XXXX-XXXX" autoCapitalize="characters" style={{ letterSpacing: 1 }} right={g ? <Chip label="확인됨" kind="ok" /> : undefined} /></View>
       {!!err && <T v="cap" style={{ color: C.danger }}>{err}</T>}
       {g && (
@@ -35,7 +35,7 @@ export default function Gift() {
         </Box>
       )}
       <View><T v="lbl">충전 대상</T><Chips><Chip big label={who} sel /><Chip big label="+ 다른 어르신" kind="line" onPress={() => r.push('/family/profile')} /></Chips></View>
-      <Box tight><T v="sub">충전되면 바로 희망 일정을 고를 수 있고, 72시간 안에 첫 일정이 정해집니다. 기업 담당자 화면은 2차에 열립니다.</T></Box>
+      <Box tight><T v="sub">충전되면 바로 희망 일정을 고를 수 있어요. 운영자가 강사와 맞춰 첫 일정을 알려 드려요.</T></Box>
       {real
         ? <Btn label={codeOk ? '코드 보내기' : '코드를 입력해 주세요'} disabled={!codeOk} onPress={sendCode} />
         : <Btn label={g ? `${PRODUCTS[g.product].total}회 충전하기` : '코드를 입력해 주세요'} disabled={!g} onPress={redeem} />}

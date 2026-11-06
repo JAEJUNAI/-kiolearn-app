@@ -8,12 +8,12 @@ export default function Tour() {
   return (
     <Screen>
       <Nav title="둘러보기" />
-      <T v="ttl">부모님 곁에 사람을 보내고,{'\n'}그날 저녁 결과를 받습니다</T>
+      <T v="ttl">부모님 곁에 사람을 보내고,{'\n'}그날 저녁 결과를 받아요</T>
       <Photo src="lesson" ratio={16 / 9} />
-      <Tile title="원하시는 날짜에 강사가 갑니다" text="결제 뒤 72시간 안에 첫 일정이 정해집니다. 안 되면 전액 환불." />
+      <Tile title="원하시는 날짜에 강사가 찾아가요" text="결제하면 운영자가 강사와 첫 일정을 맞춰 알려 드려요. 첫 수업 전에는 언제든 전액 환불돼요." />
       <Box kind="white">
         <KV first k="수업" v="90분 · 어르신 댁 1:1" />
-        <KV k="강사" v="자격증 · 신분증 · 범죄경력 확인" />
+        <KV k="강사" v="자격증 · 신분증 확인, 출강 필수 교육 이수" />
         <KV k="리포트" v="수업마다 사진과 결과" />
         <KV k="환불" v="첫 수업 전까지 전액" />
       </Box>
@@ -25,7 +25,7 @@ export default function Tour() {
       </Box>
       <T v="h">바로 배정되는 지역</T>
       <Chips>{['서울 전역', '하남', '구리', '성남', '광명', '부천', '고양'].map((x) => <Chip key={x} label={x} kind="line" big />)}</Chips>
-      <T v="cap">그 밖의 지역도 일정을 주시면 찾아봅니다.</T>
+      <T v="cap">그 밖의 지역도 일정을 주시면 찾아볼게요.</T>
       <Btn label="전화번호로 시작하기" onPress={() => r.back()} />
     </Screen>
   );

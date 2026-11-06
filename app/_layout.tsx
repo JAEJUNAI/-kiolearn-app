@@ -52,20 +52,20 @@ function DesktopShell({ children }: { children: React.ReactNode }) {
       </View>
       <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 72, paddingHorizontal: 40, paddingVertical: 28 }}>
         <View style={{ width: 380, gap: 14 }}>
-          <T style={{ fontFamily: F.extra, fontSize: 34, lineHeight: 44, letterSpacing: -0.8 }}>부모님 댁에{'\n'}선생님이 갑니다</T>
-          <T v="sub" style={{ fontSize: 15.5, lineHeight: 24 }}>자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁으로 가서 90분 동안 함께 눌러 봅니다. 그날 저녁 사진과 "혼자 해낸 것"이 옵니다.</T>
+          <T style={{ fontFamily: F.extra, fontSize: 34, lineHeight: 44, letterSpacing: -0.8 }}>부모님 댁에{'\n'}선생님이 찾아가요</T>
+          <T v="sub" style={{ fontSize: 15.5, lineHeight: 24 }}>자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁으로 가서 90분 동안 함께 눌러 봐요. 그날 저녁 사진과 "혼자 해낸 것"이 와요.</T>
           <View style={{ backgroundColor: '#fff', borderRadius: 24, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderWidth: 1, borderColor: C.line, marginTop: 8 }}>
             <Image source={require('../assets/img/qr-app.png')} style={{ width: 108, height: 108, borderRadius: 10 }} />
             <View style={{ flex: 1 }}>
               <T v="h">폰으로 열기</T>
-              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 같은 화면이 폰에서 열립니다. 설치 없이 바로 쓸 수 있고, 앱 스토어 버전은 심사 중입니다.</T>
+              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 같은 화면이 폰에서 열려요. 설치 없이 바로 쓸 수 있고, 앱 스토어 버전은 심사 중이에요.</T>
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
             <Btn label="방문 수업 알아보기" size="sm" onPress={() => open('https://kiolearn.co.kr/visit')} />
             <Btn label="강사로 일하기" size="sm" kind="ghost" onPress={() => open('https://kiolearn.co.kr/teach')} />
           </View>
-          <T v="fine" style={{ marginTop: 10 }}>오른쪽 화면은 실제 앱입니다. PC에서도 그대로 쓸 수 있습니다.</T>
+          <T v="fine" style={{ marginTop: 10 }}>오른쪽 화면은 실제 앱이에요. PC에서도 그대로 쓸 수 있어요.</T>
         </View>
         <View style={{ width: 412, height: 860, maxHeight: '96%', borderRadius: 44, borderWidth: 10, borderColor: '#141311', backgroundColor: '#141311', overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 40, shadowOffset: { width: 0, height: 24 } }}>
           <View style={{ flex: 1, backgroundColor: '#fff', borderRadius: 34, overflow: 'hidden' }}>{children}</View>
@@ -104,7 +104,7 @@ export default function Root() {
       {web && (
         <Head>
           <title>키오런 - 부모님 1:1 과외</title>
-          <meta name="description" content="자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁에 가서 90분 동안 함께 눌러 봅니다. 그날 저녁 사진과 결과가 옵니다." />
+          <meta name="description" content="자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁에 가서 90분 동안 함께 눌러 봐요. 그날 저녁 사진과 결과가 와요." />
           <meta name="theme-color" content="#ffffff" />
           <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

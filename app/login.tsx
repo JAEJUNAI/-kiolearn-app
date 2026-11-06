@@ -17,9 +17,9 @@ const ROLES: { k: Role; img: keyof typeof IMG; title: string; sub: string }[] = 
   { k: 'instructor', img: 'loginTeacher', title: '강사로 일해요', sub: '자격번호로 들어가 배정과 수업을 관리해요' },
 ];
 const COPY: Record<Role, { img: keyof typeof IMG; ttl: string; sub: string }> = {
-  family: { img: 'loginFamily', ttl: '가족으로 시작합니다', sub: '부모님 정보와 예약, 수업 결과를 이 번호로 받습니다' },
-  self: { img: 'loginSelf', ttl: '반갑습니다.\n전화번호만 넣어 주세요', sub: '비밀번호는 없습니다. 문자로 온 숫자 6자리만 넣으면 됩니다' },
-  instructor: { img: 'loginTeacher', ttl: '강사로 들어갑니다', sub: '처음 한 번만 학습실에서 받은 자격번호를 넣어 주세요' },
+  family: { img: 'loginFamily', ttl: '가족으로 시작해요', sub: '부모님 정보와 예약, 수업 결과를 이 번호로 받아요' },
+  self: { img: 'loginSelf', ttl: '반가워요.\n전화번호만 넣어 주세요', sub: '비밀번호는 없어요. 문자로 온 숫자 6자리만 넣으면 돼요' },
+  instructor: { img: 'loginTeacher', ttl: '강사로 들어가요', sub: '처음 한 번만 학습실에서 받은 자격번호를 넣어 주세요' },
 };
 const fmtPhone = (v: string) => { const d = v.replace(/\D/g, '').slice(0, 11); return d.length > 7 ? `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}` : d.length > 3 ? `${d.slice(0, 3)}-${d.slice(3)}` : d; };
 
@@ -45,7 +45,7 @@ export default function Login() {
     const asIns = role === 'instructor';
     setErr(undefined); setBusy(true); const res = await verifyOtp(digits, otp, asIns && cert.length >= 10 ? cert : undefined); setBusy(false);
     if (!res.ok || !res.account) { if (/만료|먼저 받아/.test(res.error ?? '')) setSentAt(Date.now() - 61000); return setErr(res.error ?? '번호가 맞지 않아요. 다시 확인해 주세요.'); }
-    if (asIns && !res.instructor) { setNeedCert(true); return setErr(cert ? '자격번호를 확인해 주세요.' : '처음 강사로 들어오실 때는 자격번호가 필요해요. 한 번 확인되면 다음부터는 묻지 않습니다.'); }
+    if (asIns && !res.instructor) { setNeedCert(true); return setErr(cert ? '자격번호를 확인해 주세요.' : '처음 강사로 들어오실 때는 자격번호가 필요해요. 한 번 확인되면 다음부터는 묻지 않아요.'); }
     loginServer({ phone: digits, name: res.account.name, roles: res.account.roles, instructor: res.instructor ?? null });
     // 서버에 저장된 내 정보 → 기억해 둔 가족 초대 → 처음이면 온보딩
     await pullProfile().catch(() => {});
@@ -62,7 +62,7 @@ export default function Login() {
       <View style={{ borderRadius: R.card, overflow: 'hidden' }}>
         <Image source={IMG.loginHero} style={{ width: '100%', aspectRatio: 3 / 2 }} contentFit="cover" />
       </View>
-      <T v="ttl">휴대폰, 혼자 하기 어려울 때{'\n'}선생님이 댁으로 갑니다</T>
+      <T v="ttl">휴대폰, 혼자 하기 어려울 때{'\n'}선생님이 댁으로 찾아가요</T>
       <T v="sub" style={{ marginTop: -6 }}>90분 1:1 방문 수업. 어떤 분이신지 골라 주세요.</T>
       <View style={{ gap: 10 }}>
         {ROLES.map((x) => (
@@ -74,8 +74,8 @@ export default function Login() {
           </Pressable>
         ))}
       </View>
-      {invite && <Box kind="peach" tight><T style={{ fontSize: 14 }}>가족 초대 링크로 들어오셨네요. 위에서 "가족"을 고르면 바로 연결됩니다.</T></Box>}
-      <T v="fine" style={{ textAlign: 'center' }}>계속하면 이용약관과 개인정보 처리방침에 동의하는 것입니다.</T>
+      {invite && <Box kind="peach" tight><T style={{ fontSize: 14 }}>가족 초대 링크로 들어오셨네요. 위에서 "가족"을 고르면 바로 연결돼요.</T></Box>}
+      <T v="fine" style={{ textAlign: 'center' }}>계속하면 이용약관과 개인정보 처리방침에 동의하게 돼요.</T>
     </Screen>
   );
 
@@ -110,19 +110,19 @@ export default function Login() {
       {step === 'phone'
         ? <Btn label={busy ? '보내는 중…' : '인증번호 받기'} size="xl" onPress={send} disabled={digits.length !== 11 || busy} />
         : <Btn label={busy ? '확인 중…' : role === 'instructor' ? '들어가기' : '확인하고 시작하기'} size="xl" onPress={verify} disabled={otp.length !== 6 || busy} />}
-      <T v="cap" style={{ textAlign: 'center' }}>한 번 들어오면 30일 동안 다시 묻지 않습니다.</T>
+      <T v="cap" style={{ textAlign: 'center' }}>한 번 들어오면 30일 동안 다시 묻지 않아요.</T>
 
       {role === 'instructor' && (
         <Box>
           <T v="h">아직 자격번호가 없으신가요</T>
-          <T v="sub" style={{ marginTop: 4 }}>학습실에서 온라인 6모듈을 읽고 서류 3종을 내면 발급됩니다. 실습이나 시범 수업은 없습니다.</T>
+          <T v="sub" style={{ marginTop: 4 }}>학습실에서 출강 필수 교육(온라인 6모듈)을 마치고 자격 정보와 서류 2종을 올리면 받을 수 있어요. 실습이나 시범 수업은 없어요.</T>
           <Row style={{ gap: 8, marginTop: 10 }}>
             <Btn label="학습실 열기" kind="ghost" size="sm" onPress={() => Linking.openURL('https://kiolearn.co.kr/teach-course').catch(() => {})} />
             <Btn label="강사 지원하기" kind="ghost" size="sm" onPress={() => r.push('/connect/jobs')} />
           </Row>
         </Box>
       )}
-      {invite && <Box kind="peach" tight><T style={{ fontSize: 14 }}>가족 초대 링크로 들어오셨네요. 인증이 끝나면 초대한 가족의 부모님 소식이 바로 연결됩니다.</T></Box>}
+      {invite && <Box kind="peach" tight><T style={{ fontSize: 14 }}>가족 초대 링크로 들어오셨네요. 인증이 끝나면 초대한 가족의 부모님 소식이 바로 연결돼요.</T></Box>}
     </Screen>
   );
 }

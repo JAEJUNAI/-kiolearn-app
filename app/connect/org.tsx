@@ -46,14 +46,14 @@ export default function OrgLink() {
         <View pointerEvents="none" style={{ position: 'absolute', top: 18, left: 18, right: 18, bottom: 18, borderWidth: 3, borderColor: C.fg, borderRadius: 14, opacity: 0.9 }} />
         <Icon src="icOrg" size={100} />
       </View>
-      <T v="cap" style={{ textAlign: 'center' }}>복지관·센터 안내문에 적힌 코드입니다. QR 읽기는 앱 스토어 버전에서 열립니다</T>
+      <T v="cap" style={{ textAlign: 'center' }}>복지관이나 센터 안내문에 적힌 코드예요. QR 읽기는 앱 스토어 버전에서 열려요</T>
       <Row><T v="cap" style={{ flex: 1, textAlign: 'right' }}>기관 코드</T><Input value={code} onChangeText={(v) => setCode(v.toUpperCase())} placeholder="IC-BPS-2026" autoCapitalize="characters" style={{ flex: 1.4, paddingVertical: 9 }} right={looking ? <T v="cap">확인 중</T> : undefined} /></Row>
       {show && (
         <Box kind="white" tight><Row><Image source={IMG.cls} style={{ width: 52, height: 52, borderRadius: 12 }} contentFit="cover" /><Grow><T b>{show.name}</T><T v="cap">{show.program || show.type}</T></Grow><Chip label={linked && show.id === linked.id ? '연결됨' : '확인'} kind="ok" /></Row></Box>
       )}
       {!!err && <T v="cap" style={{ color: C.danger }}>{err}</T>}
-      <Box tight><T v="sub">연결되면 이 기관을 통해 생긴 지원, 수료, 배정, 활동이 매달 기관 담당자에게 숫자로 전달됩니다. 이름과 전화번호는 동의한 범위에서만 갑니다.</T></Box>
-      <Row><Grow><T b style={{ fontSize: 13.5 }}>이름·연락처까지 기관에 전달</T><T v="cap">선택. 실적 집계(숫자)는 연결하면 전달됩니다</T></Grow><Toggle on={consent} onChange={setConsent} /></Row>
+      <Box tight><T v="sub">연결되면 이 기관으로 생긴 지원, 수료, 배정, 활동이 매달 기관 담당자에게 숫자로 전달돼요. 이름과 전화번호는 동의한 범위에서만 가요.</T></Box>
+      <Row><Grow><T b style={{ fontSize: 13.5 }}>이름과 연락처까지 기관에 전달</T><T v="cap">선택. 실적 집계(숫자)는 연결하면 전달돼요</T></Grow><Toggle on={consent} onChange={setConsent} /></Row>
       <Btn label={busy ? '연결 중' : '이 기관으로 연결하기'} disabled={!found || busy} onPress={link} />
       {linked && <Btn label="기관 공지 보기" kind="ghost" onPress={() => r.push('/connect/org-posts')} />}
     </Screen>

@@ -13,7 +13,7 @@ export default function Certs() {
   return (
     <Screen>
       <Nav title="내 수료증" />
-      {certs.length === 0 ? <Empty icon="icCert" text="수료한 과정이 아직 없어요. 과정을 마치면 여기에 수료증이 발급됩니다." /> : certs.map((c) => (
+      {certs.length === 0 ? <Empty icon="icCert" text="수료한 과정이 아직 없어요. 과정을 마치면 여기에 수료증이 발급돼요." /> : certs.map((c) => (
         <Cert key={c.id}>
           <Icon src="icCert" size={54} />
           <T v="cap">수료증</T>
@@ -24,11 +24,11 @@ export default function Certs() {
       ))}
       <Box kind="white" style={{ paddingVertical: 2 }}>
         <KV first k="과정 수료" right={<Chip label={certs.length ? `완료 · ${fmtDT(certs[0].issuedAt, false)}` : '전'} kind={certs.length ? 'ok' : 'gray'} />} style={{ paddingVertical: 12 }} />
-        <KV k="서류 3종" right={<Chip label={e.docsOkAt ? '확인' : '전'} kind={e.docsOkAt ? 'ok' : 'gray'} />} style={{ paddingVertical: 12 }} />
+        <KV k="서류 2종 (자격증·신분증)" right={<Chip label={e.docsOkAt ? '확인' : '전'} kind={e.docsOkAt ? 'ok' : 'gray'} />} style={{ paddingVertical: 12 }} />
         <KV k="학습실 확인 문제" right={<Chip label={e.quizOkAt ? '통과' : '전'} kind={e.quizOkAt ? 'ok' : 'gray'} />} style={{ paddingVertical: 12 }} />
-        <KV k={<T b style={{ fontSize: 13.5 }}>출강 가능</T>} sub={e.certNo ? `자격번호 ${e.certNo}` : '서류와 확인 문제를 통과하면 붙습니다'} right={<Chip label={e.eligibleAt ? '배정 대상' : '전'} kind={e.eligibleAt ? 'orange' : 'gray'} />} style={{ paddingVertical: 12 }} />
+        <KV k={<T b style={{ fontSize: 13.5 }}>출강 가능</T>} sub={e.certNo ? `자격번호 ${e.certNo}` : '서류와 확인 문제를 통과하면 붙어요'} right={<Chip label={e.eligibleAt ? '배정 대상' : '전'} kind={e.eligibleAt ? 'orange' : 'gray'} />} style={{ paddingVertical: 12 }} />
       </Box>
-      <Box tight><T v="sub">출강 가능은 국가자격이 아니라 이 앱 안에서 배정을 받을 수 있다는 표시입니다. 활동 설정을 채우면 요청이 오기 시작합니다.</T></Box>
+      <Box tight><T v="sub">출강 가능은 국가자격이 아니라 이 앱 안에서 배정을 받을 수 있다는 표시예요. 활동 설정을 채우면 요청이 오기 시작해요.</T></Box>
       {e.eligibleAt ? <Btn label="활동 설정하러 가기" onPress={goSettings} /> : s.demo !== false ? <Btn label="검증 통과 처리 (개발용)" kind="ghost" disabled={certs.length === 0} onPress={() => s.verifyEligibility()} /> : <Btn label="자격번호가 있어요 · 강사로 들어가기" kind="ghost" onPress={goSettings} />}
       {certs.length > 0 && <Btn label="수료증 PDF" kind="ghost" onPress={() => s.toast('PDF를 준비하면 알려드릴게요.')} />}
       <View style={{ height: 8 }} />

@@ -11,7 +11,7 @@ export default function Invite() {
   const who = rec?.honorific || '부모님';
   const make = async () => { setBusy(true); setErr(''); const out = await createInvite(); setBusy(false); if (out.ok && out.url) setLink(out.url); else setErr(out.error || '링크를 만들지 못했어요.'); };
   useEffect(() => { make(); }, []);
-  const msg = `${who} 수업 소식을 같이 받아요. 아래 링크를 눌러 전화번호로 로그인하면 연결됩니다. (14일 동안 쓸 수 있어요)\n${link}`;
+  const msg = `${who} 수업 소식을 같이 받아요. 아래 링크를 눌러 전화번호로 로그인하면 연결돼요. (14일 동안 쓸 수 있어요)\n${link}`;
   const copy = async () => {
     if (!link) return;
     try { if (Platform.OS === 'web' && navigator?.clipboard) { await navigator.clipboard.writeText(link); return s.toast('링크를 복사했어요.'); } } catch {}
@@ -25,7 +25,7 @@ export default function Invite() {
   return (
     <Screen>
       <Nav title="가족 초대" />
-      <Tile title={`${who} 소식을\n같이 받을 가족`} text="초대받은 가족은 수업 일정과 리포트를 같은 시간에 받습니다." obj="icFamily" />
+      <Tile title={`${who} 소식을\n같이 받을 가족`} text="초대받은 가족은 수업 일정과 리포트를 같은 시간에 받아요." obj="icFamily" />
       <T v="lbl">초대 링크 <T v="cap">14일 동안 쓸 수 있어요</T></T>
       <Input value={busy ? '링크를 만드는 중…' : link || '-'} ro right={link ? <Chip label="복사" kind="dark" onPress={copy} /> : undefined} />
       {!!err && <><T v="cap" style={{ color: '#c0392b' }}>{err}</T><Btn label="다시 만들기" kind="ghost" size="sm" onPress={make} /></>}
@@ -37,7 +37,7 @@ export default function Invite() {
             right={g.isPrimary ? <Chip label="대표" kind="gray" /> : g.smsOnly ? <Chip label="문자" kind="line" /> : <Row style={{ gap: 6 }}><T v="cap">결제</T><Toggle on={g.canPay} onChange={(v) => s.setGuardianPay(rec.id, g.accountId, v)} /></Row>} style={{ paddingVertical: 12 }} />
         ))}
       </Box>
-      <T v="fine">링크로 들어온 가족은 이 목록에 추가되고, 열람 권한으로 시작합니다.</T>
+      <T v="fine">링크로 들어온 가족은 이 목록에 추가되고, 열람 권한으로 시작해요.</T>
     </Screen>
   );
 }

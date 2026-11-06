@@ -32,7 +32,7 @@ export default function ReportWrite() {
       <Box tight><View style={{ gap: 9 }}>{existing.checks.map((c, i) => <Check key={i} label={c.label} chip={c.first ? '처음 성공' : undefined} />)}</View></Box>
       <Box kind="white" tight><T v="cap">한 줄 메모</T><T style={{ fontSize: 13.5 }}>{existing.memo}</T><T v="cap" style={{ marginTop: 6 }}>다음까지 해 볼 것</T><T style={{ fontSize: 13.5 }}>{existing.nextTask}</T></Box>
       {existing.notes.map((n, i) => <Box key={i} tight><T v="cap">추가 메모 · {fmtDT(n.at)}</T><T style={{ fontSize: 13.5 }}>{n.body}</T></Box>)}
-      <T v="fine">제출된 리포트는 고칠 수 없고 추가 메모만 붙습니다.</T>
+      <T v="fine">제출된 리포트는 고칠 수 없고 추가 메모만 붙어요.</T>
       <Input value={note} onChangeText={setNote} placeholder="추가 메모" multiline />
       <Btn label="추가 메모 붙이기" kind="ghost" disabled={note.trim().length < 2} onPress={() => { s.addNote(existing.id, note.trim()); setNote(''); s.toast('추가 메모를 붙였어요.'); }} />
       {ses.status === 'submitted' && <Btn label="종료" onPress={() => { s.finishSession(ses.id); r.replace('/(instructor)/today'); }} />}
@@ -41,7 +41,7 @@ export default function ReportWrite() {
 
   const takePhoto = async () => {
     if (Platform.OS === 'web') { setPhoto('kiosk'); return; }
-    const p = await ImagePicker.requestCameraPermissionsAsync(); if (!p.granted) return Alert.alert('카메라 권한이 필요해요', '리포트 사진을 찍을 때 씁니다.');
+    const p = await ImagePicker.requestCameraPermissionsAsync(); if (!p.granted) return Alert.alert('카메라 권한이 필요해요', '리포트 사진을 찍을 때 써요.');
     const res = await ImagePicker.launchCameraAsync({ quality: 0.7, allowsEditing: false });
     if (!res.canceled) { setPhotoUri(res.assets[0].uri); setPhoto('kiosk'); }
   };
@@ -52,7 +52,7 @@ export default function ReportWrite() {
       if (!out.ok) return Alert.alert('제출할 수 없어요', out.error);
       Alert.alert('제출 완료', `이달 확정 금액에 ${won(out.amount)}이 더해졌어요.`, [{ text: '확인', onPress: () => r.replace('/(instructor)/today') }]);
     };
-    if (!photo) Alert.alert('사진 없이 보낼까요', '사진이 없으면 리포트에 활동 카드가 대신 들어갑니다.', [{ text: '사진 찍기', onPress: takePhoto }, { text: '사진 없이 보내기', onPress: go }]); else go();
+    if (!photo) Alert.alert('사진 없이 보낼까요', '사진이 없으면 리포트에 활동 카드가 대신 들어가요.', [{ text: '사진 찍기', onPress: takePhoto }, { text: '사진 없이 보내기', onPress: go }]); else go();
   };
   return (
     <Screen>
@@ -71,16 +71,16 @@ export default function ReportWrite() {
           ))}
         </View>
       </Box>
-      <View><T v="lbl">한 줄 메모 <T v="cap">보호자에게 그대로 갑니다 · 어르신이 한 일을 주어로</T></T><Input value={memo} onChangeText={(v) => setMemo(v.slice(0, 200))} multiline placeholder="두 번째는 혼자 끝까지 누르셨어요." /></View>
+      <View><T v="lbl">한 줄 메모 <T v="cap">보호자에게 그대로 가요 · 어르신이 한 일을 주어로</T></T><Input value={memo} onChangeText={(v) => setMemo(v.slice(0, 200))} multiline placeholder="두 번째는 혼자 끝까지 누르셨어요." /></View>
       <View><T v="lbl">다음까지 해 볼 것</T><Input value={task} onChangeText={(v) => setTask(v.slice(0, 80))} placeholder="따님께 5천 원 보내 보기" /></View>
-      <Row><Grow><T b style={{ fontSize: 13.5 }}>특이사항</T><T v="cap">켜면 운영자가 10분 먼저 봅니다</T></Grow><Toggle on={flag} onChange={setFlag} /></Row>
+      <Row><Grow><T b style={{ fontSize: 13.5 }}>특이사항</T><T v="cap">켜면 운영자가 10분 먼저 봐요</T></Grow><Toggle on={flag} onChange={setFlag} /></Row>
       {flag && <View style={{ gap: 8 }}><Chips>{['건강', '금전·사기', '가족 요청', '기기 문제', '기타'].map((k) => <Chip key={k} big label={k} kind="line" sel={flagType === k} onPress={() => setFlagType(k)} />)}</Chips><Input value={flagNote} onChangeText={setFlagNote} multiline placeholder="무엇을 보셨는지 10자 이상" /></View>}
       <Row><Grow><T b style={{ fontSize: 13.5 }}>조기 종료</T><T v="cap">30분 미만이면 차감 없이 재방문, 수당은 교통비만</T></Grow><Toggle on={early} onChange={setEarly} /></Row>
       {early && <Input value={earlyMin} onChangeText={(v) => setEarlyMin(v.replace(/\D/g, ''))} keyboardType="number-pad" placeholder="진행한 분" right={<T v="cap">분</T>} />}
       {!early && pass.remaining > 1 && <KV first k="다음 수업" v={`${fmtDT(nextAt)} (현장에서 정한 날짜)`} />}
-      {!early && pass.remaining === 1 && <Box kind="peach" tight><T style={{ fontSize: 13 }}>이번이 마지막 회차예요. 재예약 여부는 운영자가 알려 드립니다.</T></Box>}
+      {!early && pass.remaining === 1 && <Box kind="peach" tight><T style={{ fontSize: 13 }}>이번이 마지막 회차예요. 재예약 여부는 운영자가 알려 드려요.</T></Box>}
       <Btn label="제출하기" disabled={!valid} onPress={submit} />
-      <T v="fine">제출하면 이달 확정 금액에 더해지고, 그 뒤에는 추가 메모만 쓸 수 있습니다.</T>
+      <T v="fine">제출하면 이달 확정 금액에 더해지고, 그 뒤에는 추가 메모만 쓸 수 있어요.</T>
     </Screen>
   );
 }

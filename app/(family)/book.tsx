@@ -33,13 +33,15 @@ export default function Book() {
   const [busy, setBusy] = useState(false);
   const pay = async () => {
     const slot1: Pass['slot1'] = { date: d1, slot: sl1 }; const slot2: Pass['slot2'] = d2 ? { date: d2, slot: sl2 } : undefined;
-    if (gift) { useStore.setState((st) => ({ passes: st.passes.map((p) => (p.id === gift.id ? { ...p, slot1, slot2 } : p)) })); s.toast('희망 일정을 받았어요. 72시간 안에 첫 일정을 정해 드립니다.'); return r.replace('/(family)/home'); }
+    if (gift) { useStore.setState((st) => ({ passes: st.passes.map((p) => (p.id === gift.id ? { ...p, slot1, slot2 } : p)) })); s.toast('희망 일정을 받았어요. 운영자가 강사와 맞춰서 첫 일정을 알려 드릴게요.'); return r.replace('/(family)/home'); }
     if (!LIVE_PAY) {
       setBusy(true);
       const out = await api<{ ticketId?: string }>('app', { op: 'booking-request', product, slot1, slot2, extras, recipient: { name: rec.name, honorific: rec.honorific, sigungu: rec.sigungu, dong: rec.dong, addressDetail: rec.addressDetail, deviceBrand: rec.deviceBrand, pains: rec.pains } });
       setBusy(false);
+      // 서버에 안 들어갔으면 이 기기에만 '요청함'으로 남기지 않는다. 운영자가 모르는 요청이 생기니까.
+      if (!out.ok) return s.toast(out.error ? `${out.error} 잠시 뒤 다시 눌러 주세요.` : '요청을 보내지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.');
       s.requestBooking(rec.id, product, slot1, slot2, extras, typeof out.ticketId === 'string' ? out.ticketId : undefined);
-      s.toast(out.ok ? '요청을 받았어요. 담당자가 빠르게 연락드리겠습니다.' : '요청은 저장됐어요. 연결이 되면 담당자에게 전달됩니다.');
+      s.toast('요청을 받았어요. 운영자가 곧 전화드릴게요.');
       return r.replace('/(family)/home');
     }
     s.checkout(rec.id, product, slot1, slot2, method, extras); r.replace('/(family)/home');
@@ -58,7 +60,7 @@ export default function Book() {
   return (
     <Screen>
       {s.recipients.length > 1 && <View style={{ gap: 4 }}><T v="lbl">누구 수업인가요</T><RecipientBar hideAdd /></View>}
-      <T v="ttl" style={{ fontSize: 21 }}>{gift ? '효도권으로 시작합니다' : `${recipientLabel(rec)}
+      <T v="ttl" style={{ fontSize: 21 }}>{gift ? '효도권으로 시작해요' : `${recipientLabel(rec)}
 어떤 구성으로 시작할까요`}</T>
       {!rec.addressDetail && <Box kind="peach" tight><T style={{ fontSize: 13 }}>결제 전에 {rec.honorific} 상세 주소가 필요해요. </T><Btn label="어르신 정보 적기" size="sm" kind="ghost" style={{ alignSelf: 'flex-start', marginTop: 8 }} onPress={() => r.push('/family/profile')} /></Box>}
       {!gift && (
@@ -76,19 +78,19 @@ export default function Book() {
           {outside && <Chip big label="기본 지역 밖 +10,000" kind="peach" />}
         </Chips></View>
       )}
-      <Tile pad={14} title={d1 ? `희망 일정 ${fmtDT(d1 + 'T00:00:00', false)} ${{ am: '오전', pm: '오후', eve: '저녁' }[sl1]}` : '희망 일정을 골라 주세요'} text="72시간 안에 강사와 첫 일정이 정해집니다. 안 되면 전액 환불." />
+      <Tile pad={14} title={d1 ? `희망 일정 ${fmtDT(d1 + 'T00:00:00', false)} ${{ am: '오전', pm: '오후', eve: '저녁' }[sl1]}` : '희망 일정을 골라 주세요'} text="고르신 날짜에 맞춰 운영자가 강사를 찾고 전화로 알려 드려요. 첫 수업 전에는 언제든 전액 환불돼요." />
       {!gift && LIVE_PAY && (
         <View><T v="lbl">결제 수단</T><Chips>
           {([['card', '카드'], ['transfer', '계좌이체'], ['vaccount', '가상계좌'], ['manual', '무통장 입금']] as [PayMethod, string][]).map(([k, l]) => <Chip key={k} big label={l} kind="line" sel={method === k} onPress={() => setMethod(k)} />)}
-        </Chips>{(method === 'vaccount' || method === 'manual') && <T v="cap" style={{ marginTop: 6 }}>입금 기한 3일. 입금이 확인되면 그때부터 72시간 안에 일정을 정해 드립니다.</T>}</View>
+        </Chips>{(method === 'vaccount' || method === 'manual') && <T v="cap" style={{ marginTop: 6 }}>입금 기한은 3일이에요. 입금이 확인되면 운영자가 일정을 정해 알려 드려요.</T>}</View>
       )}
       <Box kind="white">
-        <KV first k="자격 확인" v="자격증 · 신분증 · 범죄경력" />
+        <KV first k="자격 확인" v="자격증 · 신분증 · 출강 필수 교육" />
         <KV k="리포트" v="수업마다 사진과 결과" />
         <KV k="환불" v="첫 수업 전까지 전액" />
         {!gift && extraFee > 0 && <KV k="추가 비용" v={`회당 ${won(extraFee)}`} />}
       </Box>
-      {!gift && !LIVE_PAY && <Box kind="peach" tight><T style={{ fontSize: 13 }}>요청을 보내면 담당자가 배정되어 빠르게 연락드리겠습니다. 전화로 {rec.honorific} 상황을 여쭙고 결제 링크를 보내드려요. 결제 전까지 비용은 없습니다.</T></Box>}
+      {!gift && !LIVE_PAY && <Box kind="peach" tight><T style={{ fontSize: 13 }}>요청을 보내면 운영자가 전화로 {rec.honorific} 상황을 여쭙고 결제 링크를 보내 드려요. 결제하기 전까지는 비용이 없어요.</T></Box>}
       <Btn label={gift ? '희망 일정 보내기' : LIVE_PAY ? `${won(total)} 결제하기` : `${PRODUCTS[product].name} 예약 요청하기`} disabled={!ready || busy} onPress={pay} />
       <T v="fine">{LIVE_PAY ? `${method === 'card' ? '토스페이먼츠 카드 결제' : method === 'transfer' ? '토스페이먼츠 계좌이체' : method === 'vaccount' ? '토스페이먼츠 가상계좌' : '법인 계좌 무통장 입금'} · 영수증 자동 발급 · ` : `${won(total)} · 카드, 계좌이체, 무통장 입금 · 영수증 발급 · `}유효기간 안 미사용분은 사용 회차를 정가로 빼고 환불</T>
     </Screen>

@@ -22,7 +22,7 @@ export default function Today() {
   const weekCount = mine.filter((x) => new Date(x.scheduledAt) >= weekStart && new Date(x.scheduledAt) < weekEnd && x.status !== 'cancelled').length;
   const callsLeft = mine.filter((x) => x.status === 'scheduled' && new Date(x.scheduledAt) > new Date() && new Date(x.scheduledAt) < weekEnd).length;
 
-  const callSheet = (sid: string, phone = '010-0000-0000') => Alert.alert('어르신께 전화', `${phone}로 전화를 겁니다. 통화 결과를 알려 주세요.`, [
+  const callSheet = (sid: string, phone = '010-0000-0000') => Alert.alert('어르신께 전화', `${phone}로 전화를 걸어요. 통화 결과를 알려 주세요.`, [
     { text: '통화함', onPress: () => s.confirmCall(sid) }, { text: '통화 안 됨', onPress: () => s.callFailed(sid) }, { text: '닫기', style: 'cancel' }]);
   const arrive = async (sid: string) => {
     let dist: number | undefined;
@@ -31,16 +31,16 @@ export default function Today() {
       else dist = 80;
     } catch { dist = undefined; }
     if (dist === undefined || dist > 200) {
-      Alert.alert('위치가 다릅니다', '그래도 도착 처리할까요? 사유를 골라 주세요.', [{ text: '주소 오류', onPress: () => s.arrive(sid, dist, '주소 오류') }, { text: '위치 안 잡힘', onPress: () => s.arrive(sid, dist, '위치 안 잡힘') }, { text: '기타', onPress: () => s.arrive(sid, dist, '기타') }, { text: '닫기', style: 'cancel' }]);
+      Alert.alert('위치가 달라요', '그래도 도착 처리할까요? 사유를 골라 주세요.', [{ text: '주소 오류', onPress: () => s.arrive(sid, dist, '주소 오류') }, { text: '위치 안 잡힘', onPress: () => s.arrive(sid, dist, '위치 안 잡힘') }, { text: '기타', onPress: () => s.arrive(sid, dist, '기타') }, { text: '닫기', style: 'cancel' }]);
     } else s.arrive(sid, dist);
   };
 
   return (
     <Screen>
       <Row><Grow><T v="cap">{fmtDT(new Date(), false)}</T><T v="ttl">{me.name.slice(1)} 님,{'\n'}오늘 수업 {today.length}건</T></Grow><Avatar src={me.photo} /></Row>
-      {!me.settings.enabled && <Box kind="peach" tight><Row><Grow><T b style={{ fontSize: 13 }}>배정 받기가 꺼져 있어요</T><T v="cap">활동 설정을 켜면 요청이 옵니다</T></Grow><Chip label="활동 설정" kind="dark" onPress={() => r.push('/instructor/settings')} /></Row></Box>}
+      {!me.settings.enabled && <Box kind="peach" tight><Row><Grow><T b style={{ fontSize: 13 }}>배정 받기가 꺼져 있어요</T><T v="cap">활동 설정을 켜면 요청이 와요</T></Grow><Chip label="활동 설정" kind="dark" onPress={() => r.push('/instructor/settings')} /></Row></Box>}
 
-      {today.length === 0 && tomorrow.length === 0 && <Empty text="배정 요청이 오면 여기에 보입니다." />}
+      {today.length === 0 && tomorrow.length === 0 && <Empty text="배정 요청이 오면 여기에 보여요." />}
 
       {today.map((ses) => {
         const rec = s.recipients.find((x) => x.id === ses.recipientId)!; const st = ses.status;
@@ -61,11 +61,11 @@ export default function Today() {
               {st === 'scheduled' && <><Btn label="어르신께 전화" grow onPress={() => callSheet(ses.id)} /><Btn label="수업 카드" kind="ghost" size="sm" style={{ height: 50 }} onPress={() => r.push(`/instructor/lesson/${ses.id}`)} /></>}
               {st === 'confirmed' && <><Btn label="출발" grow onPress={() => s.depart(ses.id)} /><Btn label="수업 카드" kind="ghost" size="sm" style={{ height: 50 }} onPress={() => r.push(`/instructor/lesson/${ses.id}`)} /></>}
               {st === 'departed' && <Btn label="도착" grow onPress={() => arrive(ses.id)} />}
-              {st === 'arrived' && <><Btn label="수업 카드 열기" grow onPress={() => { s.startLesson(ses.id); r.push(`/instructor/lesson/${ses.id}`); }} />{arrivedMin >= 15 && <Btn label="만나지 못함" kind="danger" size="sm" style={{ height: 50 }} onPress={() => Alert.alert('만나지 못했나요', '15분 기다렸고 연락이 안 되면 눌러 주세요. 보호자에게 바로 알립니다.', [{ text: '아니오' }, { text: '네', onPress: () => s.noShow(ses.id) }])} />}</>}
+              {st === 'arrived' && <><Btn label="수업 카드 열기" grow onPress={() => { s.startLesson(ses.id); r.push(`/instructor/lesson/${ses.id}`); }} />{arrivedMin >= 15 && <Btn label="만나지 못함" kind="danger" size="sm" style={{ height: 50 }} onPress={() => Alert.alert('만나지 못했나요', '15분 기다렸고 연락이 안 되면 눌러 주세요. 보호자에게 바로 알려요.', [{ text: '아니오' }, { text: '네', onPress: () => s.noShow(ses.id) }])} />}</>}
               {st === 'in_progress' && <><Btn label="수업 카드" kind="ghost" grow onPress={() => r.push(`/instructor/lesson/${ses.id}`)} /><Btn label="리포트 쓰기" grow onPress={() => r.push(`/instructor/report/${ses.id}`)} /></>}
-              {st === 'submitted' && <Btn label="종료" grow onPress={() => { s.finishSession(ses.id); s.toast('수고하셨어요. 정산에 반영됐습니다.'); }} />}
+              {st === 'submitted' && <Btn label="종료" grow onPress={() => { s.finishSession(ses.id); s.toast('수고하셨어요. 정산에 반영됐어요.'); }} />}
             </Row>
-            {st === 'arrived' && arrivedMin < 15 && <T v="fine" style={{ marginTop: 8 }}>문을 안 여시면 15분 뒤 "만나지 못함" 버튼이 생깁니다.</T>}
+            {st === 'arrived' && arrivedMin < 15 && <T v="fine" style={{ marginTop: 8 }}>문을 안 여시면 15분 뒤 "만나지 못함" 버튼이 생겨요.</T>}
           </Box>
         );
       })}
@@ -82,7 +82,7 @@ export default function Today() {
         <KV first k="이번 주" v={`수업 ${weekCount}회 · 전화 ${callsLeft}통 남음`} />
         <KV k="이달 확정" v={`${won(confirmed)} · 다음 달 10일 입금`} onPress={() => r.push('/(instructor)/payout')} />
       </Box>
-      {Platform.OS === 'web' && <T v="fine">웹에서는 위치 확인을 건너뜁니다.</T>}
+      {Platform.OS === 'web' && <T v="fine">웹에서는 위치 확인을 건너뛰어요.</T>}
       {!!Linking && null}
     </Screen>
   );

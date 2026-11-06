@@ -20,7 +20,7 @@ export default function InviteLanding() {
     <Screen>
       <View style={{ alignItems: 'center', paddingTop: 24 }}><Icon src="icFamily" size={110} /></View>
       <T v="ttl" style={{ textAlign: 'center' }}>가족이 부모님 수업 소식을{'\n'}같이 받자고 초대했어요</T>
-      <T v="sub" style={{ textAlign: 'center' }}>전화번호로 로그인하면 바로 연결됩니다. 수업 일정과 그날 결과를 같은 시간에 받아요.</T>
+      <T v="sub" style={{ textAlign: 'center' }}>전화번호로 로그인하면 바로 연결돼요. 수업 일정과 그날 결과를 같은 시간에 받아요.</T>
       <Btn label="전화번호로 시작하기" onPress={() => r.replace({ pathname: '/login', params: { invite: String(token || '') } })} />
     </Screen>
   );

@@ -191,7 +191,7 @@ export const useStore = create<State & Actions>()(
           slot1, slot2, source: 'pg', extras, noShowCount: 0,
         };
         set((s) => ({ passes: [...s.passes, pass] }));
-        if (immediate) get().toast('결제가 완료됐어요. 72시간 안에 첫 일정을 정해 드립니다.');
+        if (immediate) get().toast('결제가 끝났어요. 운영자가 강사와 첫 일정을 맞춰 알려 드릴게요.');
         return pass;
       },
       requestBooking: (recipientId, product, slot1, slot2, extras, ticketId) => {

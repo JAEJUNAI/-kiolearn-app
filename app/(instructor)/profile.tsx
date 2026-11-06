@@ -15,7 +15,7 @@ export default function Profile() {
       <Box tight>
         <KV first k="배정" v={`${me.stats.assigned}회`} />
         <KV k="재예약" v={`${me.stats.rebooked}건`} />
-        <KV k="자격 확인" v="서류 3종 확인" />
+        <KV k="자격 확인" v="자격증 · 신분증 확인" />
         <KV k="자격번호" v={me.certNo} />
       </Box>
       <View>
@@ -29,7 +29,7 @@ export default function Profile() {
         <Btn label={edit ? '저장' : '사진 · 소개 수정'} kind={edit ? 'primary' : 'ghost'} size="sm" grow onPress={() => { if (edit) { s.updateIntro(intro); s.toast('저장했어요.'); } setEdit(!edit); }} />
         <Btn label="활동 설정" kind="ghost" size="sm" grow onPress={() => r.push('/instructor/settings')} />
       </Row>
-      <T v="fine">이름, 사진, 한 줄 소개, 재예약 수, 자격 확인 표시만 보호자에게 보입니다. 전화번호와 주소, 수업 수, 평가 비율은 보이지 않습니다.</T>
+      <T v="fine">이름, 사진, 한 줄 소개, 재예약 수, 자격 확인 표시만 보호자에게 보여요. 전화번호와 주소, 수업 수, 평가 비율은 보이지 않아요.</T>
       <Box style={{ paddingVertical: 2 }}>
         {s.account.roles.includes('family') && <KV first k="가족 모드로 보기" onPress={() => { s.setMode('family'); r.replace('/(family)/home'); }} style={{ paddingVertical: 12 }} />}
         <KV first={!s.account.roles.includes('family')} k="배우고, 일로 잇기 (과정)" onPress={() => r.push('/courses')} style={{ paddingVertical: 12 }} />

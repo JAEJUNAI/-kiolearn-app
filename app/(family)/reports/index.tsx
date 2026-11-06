@@ -22,7 +22,7 @@ export default function Reports() {
         <Bar pct={bought ? (used / bought) * 100 : 0} />
         <T v="cap" style={{ marginTop: 8 }}>혼자 해낸 것 {solo}개 · 처음 성공 {firsts}번</T>
       </Box>
-      {reps.length === 0 ? <Empty text="첫 수업 뒤 여기에 사진과 결과가 쌓입니다." /> : (
+      {reps.length === 0 ? <Empty text="첫 수업 뒤 여기에 사진과 결과가 쌓여요." /> : (
         <>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
             {grid.map((x) => (

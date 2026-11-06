@@ -26,7 +26,7 @@ export default function Payout() {
       <T v="cap">{now.getMonth() + 1}월 · 확정 금액</T>
       <Row style={{ marginTop: -8 }} align="baseline"><T v="big">{num(total)}</T><T style={{ fontSize: 18, fontFamily: 'Pretendard-Bold' }}>원</T></Row>
       <Row style={{ marginTop: -4 }}><Chip label={`${payDay.getMonth() + 1}월 10일 입금`} kind="dark" /><T v="cap">수업 {lessons}회 · 이동 보상 {transport}건 · 3.3% 공제 전</T></Row>
-      <Tile pad={14} title={me.grade < 3 ? `다음 단계까지 ${Math.max(0, nextGrade)}회` : '3단계 · 경험 많은 강사'} text={`단계가 오르면 배정 요청을 먼저 받습니다. 월 ${RULES.bonusOver}회를 넘기면 보너스 ${won(RULES.bonusAmount)}.`}>
+      <Tile pad={14} title={me.grade < 3 ? `다음 단계까지 ${Math.max(0, nextGrade)}회` : '3단계 · 경험 많은 강사'} text={`단계가 오르면 배정 요청을 먼저 받아요. 월 ${RULES.bonusOver}회를 넘기면 보너스 ${won(RULES.bonusAmount)}.`}>
         {me.grade < 3 && <Bar light pct={(me.stats.lessons / RULES.gradeLessons[me.grade]) * 100} style={{ marginTop: 10 }} />}
       </Tile>
       <Chips><Chip big label="미정산" kind="line" sel={tab === 'open'} onPress={() => setTab('open')} /><Chip big label="정산 완료" kind="line" sel={tab === 'paid'} onPress={() => setTab('paid')} /></Chips>
@@ -38,7 +38,7 @@ export default function Payout() {
         ))}
       </Box>
       <Btn label="활동 증명서 받기" kind="ghost" onPress={() => r.push('/instructor/certificate')} />
-      <T v="fine">매월 1일 전월 마감, 10일 입금, 3.3% 공제. 금액 문의는 행을 길게 눌러 운영자에게 보냅니다.</T>
+      <T v="fine">매월 1일 전월 마감, 10일 입금, 3.3% 공제. 금액 문의는 행을 길게 눌러 운영자에게 보내요.</T>
       <View style={{ height: 8 }} />
     </Screen>
   );

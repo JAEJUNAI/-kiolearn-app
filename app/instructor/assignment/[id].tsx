@@ -16,7 +16,7 @@ export default function Assignment() {
   const rec = s.recipients.find((x) => x.id === a.recipientId)!; const p = s.passes.find((x) => x.id === a.passId)!;
   const gone = a.status !== 'requested' || new Date(a.expiresAt) < new Date();
   const accept = () => { const o = s.acceptAssignment(a.id, slot); if (!o.ok) Alert.alert('맡을 수 없어요', o.error); else r.replace('/(instructor)/today'); };
-  const decline = () => Alert.alert('거절 사유', '사유는 집계에만 쓰이고 불이익은 없습니다.', ['거리', '시간', '주제', '개인 사정', '기타'].map((why) => ({ text: why, onPress: () => { s.declineAssignment(a.id, why); r.back(); } })).concat([{ text: '닫기', onPress: () => {} }]));
+  const decline = () => Alert.alert('거절 사유', '사유는 집계에만 쓰이고 불이익은 없어요.', ['거리', '시간', '주제', '개인 사정', '기타'].map((why) => ({ text: why, onPress: () => { s.declineAssignment(a.id, why); r.back(); } })).concat([{ text: '닫기', onPress: () => {} }]));
   return (
     <Screen>
       <Nav title="배정 요청" right={<T v="cap" style={{ color: C.orangeDeep, fontFamily: 'Pretendard-Bold' }}>{gone ? '마감' : `남은 시간 ${remain(a.expiresAt, 'hms')}`}</T>} />
@@ -29,9 +29,9 @@ export default function Assignment() {
       </Box>
       <View><T v="lbl">어르신 메모 <T v="cap">운영자 상담 기록 전체</T></T><Box tight><T style={{ fontSize: 13, lineHeight: 20 }}>{rec.opsMemo}</T></Box></View>
       {p.slot2 && <View><T v="lbl">맡을 일정</T><Chips><Chip big label="1순위" kind="line" sel={slot === 1} onPress={() => setSlot(1)} /><Chip big label="2순위" kind="line" sel={slot === 2} onPress={() => setSlot(2)} /></Chips></View>}
-      <Btn label={gone ? '다른 선생님이 맡았습니다' : '수락하기'} disabled={gone} onPress={accept} />
+      <Btn label={gone ? '다른 선생님이 맡았어요' : '수락하기'} disabled={gone} onPress={accept} />
       {!gone && <Btn label="거절 (사유 선택)" kind="ghost" onPress={decline} />}
-      <T v="fine">수락하면 보호자에게 바로 알림이 가고, 수업 전날 전화 할 일이 생깁니다. 상세 주소는 수락 뒤에 보입니다.</T>
+      <T v="fine">수락하면 보호자에게 바로 알림이 가고, 수업 전날 전화 할 일이 생겨요. 상세 주소는 수락 뒤에 보여요.</T>
     </Screen>
   );
 }

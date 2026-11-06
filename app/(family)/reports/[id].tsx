@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen, Nav, T, Row, Grow, Chip, Photo, Box, Check, Avatar, Btn, Input, Icon } from '../../../src/ui';
+import { sendTicket } from '../../../src/lib/profile';
 import { useStore } from '../../../src/data/store';
 import { fmtDT, fmtTime } from '../../../src/lib/fmt';
 import { C } from '../../../src/theme';
@@ -33,11 +34,11 @@ export default function ReportDetail() {
       )}
       {showNote && (
         <View style={{ gap: 8 }}>
-          <Input value={note} onChangeText={setNote} placeholder="어떤 점이 아쉬웠는지 적어 주시면 운영자가 확인합니다" multiline />
-          <Btn label="보내기" size="sm" onPress={() => { s.rateReport(rep.id, 'bad', note); setShowNote(false); s.toast('운영자가 확인하고 연락드릴게요.'); }} style={{ alignSelf: 'flex-end' }} />
+          <Input value={note} onChangeText={setNote} placeholder="어떤 점이 아쉬웠는지 적어 주시면 운영자가 확인해요" multiline />
+          <Btn label="보내기" size="sm" onPress={async () => { s.rateReport(rep.id, 'bad', note); setShowNote(false); const out = await sendTicket('report_bad', `리포트 ${rep.seq}회차 "아쉬워요" · ${note || '(내용 없음)'}`, rep.id); s.toast(out.ok ? '받았어요. 운영자가 확인하고 연락드릴게요.' : out.error!); }} style={{ alignSelf: 'flex-end' }} />
         </View>
       )}
-      <T v="fine" style={{ color: C.muted }}>사진은 길게 눌러 저장할 수 있어요. 강사에게는 평가 집계만 보이고 누가 남겼는지는 보이지 않습니다.</T>
+      <T v="fine" style={{ color: C.muted }}>사진은 길게 눌러 저장할 수 있어요. 강사에게는 평가 집계만 보이고 누가 남겼는지는 보이지 않아요.</T>
     </Screen>
   );
 }

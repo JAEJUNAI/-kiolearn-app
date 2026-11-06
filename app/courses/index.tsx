@@ -21,7 +21,7 @@ export default function Courses() {
           <Box kind="white" tight><Row>{c.direct && c.price === 0 ? <Icon src="icCert" size={44} /> : <Image source={IMG[c.img]} style={{ width: 44, height: 44, borderRadius: 12 }} contentFit="cover" />}<Grow><Row style={{ gap: 6, flexWrap: 'wrap' }}><T b>{c.title}</T><Chip label={c.direct ? '직영' : '파트너'} kind={c.direct ? 'dark' : 'peach'} /></Row><T v="cap">{c.provider} · {c.format} · {c.price ? won(c.price) : '무료'}</T></Grow></Row></Box>
         </Pressable>
       ))}
-      <T v="fine">모든 과정의 수료증은 "○○기관 과정 수료"로 발급됩니다. 출강 가능 표시는 우리 검증을 통과한 분에게만 붙습니다.</T>
+      <T v="fine">모든 과정의 수료증은 "○○기관 과정 수료"로 발급돼요. 출강 가능 표시는 우리 확인 절차를 통과한 분에게만 붙어요.</T>
     </Screen>
   );
 }

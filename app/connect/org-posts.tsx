@@ -18,7 +18,7 @@ export default function OrgPosts() {
       <Box kind="white" style={{ paddingVertical: 2 }}>
         {rest.map((p, i) => <KV key={p.id} first={i === 0} k={<T b style={{ fontSize: 13.5 }}>{p.title}</T>} sub={`${p.when}${p.place ? ` · ${p.place}` : ''}`} right={p.apply ? <Chip label="신청" kind="dark" onPress={() => call(p.phone)} /> : <Chip label="읽기만" kind="gray" />} style={{ paddingVertical: 12 }} />)}
       </Box>
-      <T v="fine">신청을 누르면 기관으로 전화가 연결됩니다. 앱 안 신청은 다음 버전에 열립니다.</T>
+      <T v="fine">신청을 누르면 기관으로 전화가 연결돼요. 앱 안 신청은 다음 버전에 열려요.</T>
     </Screen>
   );
 }
