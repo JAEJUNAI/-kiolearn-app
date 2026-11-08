@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { Screen, T, Row, Grow, Avatar, Tile, Box, Chip, ModTile, Photo, Btn, KV, Bar, Icon } from '../../src/ui';
 import { useStore, sel } from '../../src/data/store';
 import { fmtDT, remain, won, slotLabel } from '../../src/lib/fmt';
-import { PRODUCTS } from '../../src/data/types';
+import { PRODUCTS, TRIAL_PROMO, trialPrice } from '../../src/data/types';
 import { C, F } from '../../src/theme';
 import { api } from '../../src/lib/supabase';
 import { RecipientBar } from '../../src/components/RecipientBar';
@@ -78,7 +78,7 @@ export default function Home() {
       <Tile title="강사가 댁으로 찾아가요" text="90분 1:1 수업. 예약 요청을 남기면 운영자가 전화로 상황을 여쭙고 일정을 잡아 드려요." pad={15} />
       <Box kind="white">
         <KV first k="수업" v="90분 · 어르신 댁 1:1" />
-        <KV k="가격" v="1회 79,000원" />
+        <KV k="가격" v={`첫 체험 ${won(trialPrice())}`} sub={trialPrice() < PRODUCTS.trial.price ? `${TRIAL_PROMO.label} · 이후 1회 49,000원` : "이후 1회 49,000원"} />
         <KV k="결과" v="수업마다 사진과 리포트" />
       </Box>
       <Btn label="수업 예약하기" onPress={() => r.push('/(family)/book')} />
