@@ -13,19 +13,20 @@ export interface Recipient {
   guardians: { accountId: string; name: string; isPrimary: boolean; canPay: boolean; canView: boolean; smsOnly?: boolean; relation?: string }[];
 }
 
-export type Product = 'p90' | 'p120' | 'pass3' | 'pass5' | 'pass10' | 'pass20' | 'pass30' | 'monthly4' | 'monthly8' | 'member';
+export type Product = 'trial' | 'p90' | 'pass3' | 'pass5' | 'pass10' | 'monthly4';
+/** 2026-11-08 가격 개편. 첫 체험은 처음 신청하는 가정만 1회. 11월 신청은 35,000원(TRIAL_PROMO). 두 분 함께는 추가 요금(+15,000). */
 export const PRODUCTS: Record<Product, { name: string; price: number; total: number; sub: string; months: number; per?: number }> = {
-  p90: { name: '90분 1회', price: 79000, total: 1, sub: '90분 × 1회', months: 3 },
-  p120: { name: '120분 두 분', price: 119000, total: 1, sub: '두 분 함께 × 1회', months: 3 },
-  pass3: { name: '3회권', price: 199000, total: 3, sub: '90분 × 3회 · 같은 강사가 끝까지', months: 6, per: 66333 },
-  pass5: { name: '5회권', price: 329000, total: 5, sub: '90분 × 5회', months: 6, per: 65800 },
-  pass10: { name: '10회권', price: 639000, total: 10, sub: '12개월 · 수료증과 액자 포함', months: 12, per: 63900 },
-  pass20: { name: '20회권', price: 1230000, total: 20, sub: '18개월 · 10회권 혜택 동일', months: 18, per: 61500 },
-  pass30: { name: '30회권', price: 1770000, total: 30, sub: '24개월 · 10회권 혜택 동일', months: 24, per: 59000 },
-  monthly4: { name: '매월 정기 4회', price: 259000, total: 4, sub: '매월 선결제 · 두 달째부터 수료증', months: 1, per: 64750 },
-  monthly8: { name: '매월 정기 8회', price: 499000, total: 8, sub: '매월 선결제', months: 1, per: 62375 },
-  member: { name: '멤버십', price: 29000, total: 0, sub: '첫 방문 90분 + 월 2회 전화 점검', months: 1 },
+  trial: { name: '첫 체험 1회', price: 39000, total: 1, sub: '90분 · 처음 신청하는 가정만 한 번', months: 3 },
+  p90: { name: '1회', price: 49000, total: 1, sub: '90분 × 1회', months: 3 },
+  pass3: { name: '3회권', price: 139000, total: 3, sub: '90분 × 3회 · 같은 강사가 끝까지', months: 6, per: 46333 },
+  pass5: { name: '5회권', price: 229000, total: 5, sub: '90분 × 5회', months: 6, per: 45800 },
+  pass10: { name: '10회권', price: 449000, total: 10, sub: '12개월 · 수료증과 액자 포함', months: 12, per: 44900 },
+  monthly4: { name: '매월 정기 4회', price: 179000, total: 4, sub: '매주 1회 · 언제든 해지', months: 1, per: 44750 },
 };
+/** 첫 체험 기간 할인: 2026년 11월 신청분은 35,000원 */
+export const TRIAL_PROMO = { price: 35000, until: '2026-11-30', label: '11월 35,000원' };
+export const trialPrice = (d = new Date()) => (d.toISOString().slice(0, 10) <= TRIAL_PROMO.until ? TRIAL_PROMO.price : PRODUCTS.trial.price);
+
 export type PayMethod = 'card' | 'transfer' | 'vaccount' | 'manual';
 export type PassStatus = 'draft' | 'requested' | 'pending_deposit' | 'paid' | 'active' | 'exhausted' | 'expired' | 'refunded' | 'cancelled';
 export interface Pass {

@@ -113,7 +113,7 @@ export function calcPayout(s: Session, opts: { normal: boolean; earlyEnd?: boole
 export function calcRefund(p: Pass): number {
   const used = p.total - p.remaining;
   if (used <= 0) return p.price;
-  const unit = p.product === 'p120' ? 119000 : 79000;
+  const unit = 49000; // 사용한 회차는 1회 정가(49,000원)로 정산
   return Math.max(0, p.price - Math.round(used * unit));
 }
 

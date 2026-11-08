@@ -39,9 +39,9 @@ const CHECKS: Record<number, { label: string; first?: boolean }[]> = {
 const PHOTOS: Array<Report['photo']> = ['kiosk', 'lesson', 'fourcut', 'seniorMan', 'cls', 'lesson', 'kiosk', 'fourcut', 'lesson', 'cls', 'kiosk', 'lesson'];
 
 export const passes: Pass[] = [
-  { id: 'p1', recipientId: 'r1', product: 'pass10', total: 10, remaining: 0, price: 639000, status: 'exhausted', method: 'card', paidAt: ago(24 * 95), validUntil: at(270), source: 'pg', noShowCount: 0 },
-  { id: 'p2', recipientId: 'r1', product: 'pass10', total: 10, remaining: 8, price: 639000, status: 'active', method: 'card', paidAt: ago(24 * 12), validUntil: at(353), source: 'pg', noShowCount: 0, slot1: { date: day(-10), slot: 'pm' } },
-  { id: 'p3', recipientId: 'r2', product: 'pass10', total: 10, remaining: 10, price: 639000, status: 'paid', method: 'card', paidAt: ago(5), promiseDueAt: new Date(Date.now() + 67 * 3600000).toISOString(), validUntil: at(365), source: 'pg', noShowCount: 0, slot1: { date: day(6), slot: 'am' }, slot2: { date: day(7), slot: 'am' } },
+  { id: 'p1', recipientId: 'r1', product: 'pass10', total: 10, remaining: 0, price: 449000, status: 'exhausted', method: 'card', paidAt: ago(24 * 95), validUntil: at(270), source: 'pg', noShowCount: 0 },
+  { id: 'p2', recipientId: 'r1', product: 'pass10', total: 10, remaining: 8, price: 449000, status: 'active', method: 'card', paidAt: ago(24 * 12), validUntil: at(353), source: 'pg', noShowCount: 0, slot1: { date: day(-10), slot: 'pm' } },
+  { id: 'p3', recipientId: 'r2', product: 'pass10', total: 10, remaining: 10, price: 449000, status: 'paid', method: 'card', paidAt: ago(5), promiseDueAt: new Date(Date.now() + 67 * 3600000).toISOString(), validUntil: at(365), source: 'pg', noShowCount: 0, slot1: { date: day(6), slot: 'am' }, slot2: { date: day(7), slot: 'am' } },
   { id: 'p4', recipientId: 'r3', product: 'pass3', total: 3, remaining: 2, price: 199000, status: 'active', method: 'transfer', paidAt: ago(24 * 9), validUntil: at(170), source: 'pg', noShowCount: 0 },
 ];
 
@@ -68,8 +68,8 @@ export const reports: Report[] = sessions.filter((s) => s.recipientId === 'r1' &
 }));
 
 export const assignments: Assignment[] = [
-  { id: 'as1', recipientId: 'r2', passId: 'p3', instructorId: 'i1', status: 'requested', requestedAt: ago(5), expiresAt: new Date(Date.now() + 19 * 3600000).toISOString(), distanceKm: 4.8, topic: '은행 앱 이체 · 키오스크', payout: 40000 },
-  { id: 'as2', recipientId: 'r2', passId: 'p3', instructorId: 'i2', status: 'requested', requestedAt: ago(5), expiresAt: new Date(Date.now() + 19 * 3600000).toISOString(), distanceKm: 7.1, topic: '은행 앱 이체 · 키오스크', payout: 40000 },
+  { id: 'as1', recipientId: 'r2', passId: 'p3', instructorId: 'i1', status: 'requested', requestedAt: ago(5), expiresAt: new Date(Date.now() + 19 * 3600000).toISOString(), distanceKm: 4.8, topic: '은행 앱 이체 · 키오스크', payout: 35000 },
+  { id: 'as2', recipientId: 'r2', passId: 'p3', instructorId: 'i2', status: 'requested', requestedAt: ago(5), expiresAt: new Date(Date.now() + 19 * 3600000).toISOString(), distanceKm: 7.1, topic: '은행 앱 이체 · 키오스크', payout: 35000 },
 ];
 
 const thisMonth = ym(new Date().toISOString());

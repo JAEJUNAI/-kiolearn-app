@@ -106,7 +106,7 @@ export default function Home() {
           </Box>
         </Pressable>
       )}
-      {promo && <Box kind="peach" tight><T style={{ fontSize: 13 }}>10회권으로 바꾸면 회당 63,900원. 같은 강사가 계속 찾아가요.</T></Box>}
+      {promo && <Box kind="peach" tight><T style={{ fontSize: 13 }}>10회권으로 바꾸면 회당 44,900원이에요. 같은 강사가 계속 찾아가요.</T></Box>}
       <Row style={{ gap: 8 }}>
         <ModTile src="icFamily" label="가족" onPress={() => r.push('/family/invite')} />
         <ModTile src="icActivity" label="활동" onPress={() => { s.setMode('senior'); r.replace('/(senior)/today'); }} />

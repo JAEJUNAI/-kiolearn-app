@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Screen, Nav, T, Chips, Chip, Cert, Icon, KV, Btn } from '../../src/ui';
+import { sendTicket } from '../../src/lib/profile';
 import { useStore, sel } from '../../src/data/store';
 import { fmtYM, ymd } from '../../src/lib/fmt';
 
 export default function Certificate() {
   const s = useStore(); const me = sel.me(s); const [range, setRange] = useState<'month' | 'year' | 'custom'>('year');
-  const now = new Date(); const from = range === 'month' ? fmtYM(now) : '2026.03'; const to = fmtYM(now);
+  const now = new Date(); const from = range === 'month' ? fmtYM(now) : (me.issuedAt ? me.issuedAt.slice(0, 7).replace('-', '.') : fmtYM(now)); const to = fmtYM(now);
   const no = `CERT-${ymd(now).replace(/-/g, '')}-${me.certNo.slice(-4)}`;
   return (
     <Screen>
@@ -24,10 +25,9 @@ export default function Certificate() {
           <KV k="재예약" v={`${me.stats.rebooked}건`} />
           <KV k="발급" v={`(주)재준에이아이 · ${ymd(now).replace(/-/g, '.')}`} />
         </View>
-        <T v="cap" style={{ marginTop: 10 }}>문서번호 {no} · app.kiolearn.co.kr/verify 에서 진위 확인</T>
+        <T v="cap" style={{ marginTop: 10 }}>문서번호 {no} · 진위 확인 010-3871-5430</T>
       </Cert>
-      <Btn label="PDF 받기" onPress={() => s.toast('PDF를 만들고 있어요. 준비되면 알려드릴게요.')} />
-      <Btn label="메일로 보내기" kind="ghost" onPress={() => s.toast('등록된 메일로 보냈어요.')} />
+      <Btn label="도장 찍힌 증명서 요청하기" onPress={async () => { const out = await sendTicket('cert_request', `활동 증명서 요청 · ${me.name} ${me.certNo} · 기간 ${from}~${to}`); s.toast(out.ok ? '요청을 받았어요. 운영자가 1영업일 안에 문자로 보내 드릴게요.' : out.error!); }} />
     </Screen>
   );
 }

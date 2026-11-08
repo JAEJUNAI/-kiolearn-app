@@ -3,7 +3,7 @@
 const auth = require('./_lib/auth');
 const { sb, one, err, slack } = require('./_lib/db');
 
-const PRODUCT_NAME = { p90: '90분 1회', p120: '120분 두 분', pass3: '3회권', pass5: '5회권', pass10: '10회권', pass20: '20회권', pass30: '30회권', monthly4: '매월 정기 4회', monthly8: '매월 정기 8회', member: '멤버십' };
+const PRODUCT_NAME = { trial: '첫 체험 1회', p90: '1회', pass3: '3회권', pass5: '5회권', pass10: '10회권', monthly4: '매월 정기 4회' };
 const SLOT = { am: '오전', pm: '오후', eve: '저녁' };
 
 module.exports = async function handler(req, res) {

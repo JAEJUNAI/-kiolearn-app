@@ -25,7 +25,7 @@ export default function Assignment() {
         <KV k="일시" style={{ marginTop: 8 }} v={<View style={{ alignItems: 'flex-end' }}><T b style={{ fontSize: 13.5 }}>{p.slot1 ? `${fmtDT(p.slot1.date + 'T00:00:00', false)} ${slotLabel(p.slot1.slot)}` : '-'}</T>{p.slot2 && <T v="cap">2순위 {fmtDT(p.slot2.date + 'T00:00:00', false)} {slotLabel(p.slot2.slot)}</T>}</View>} />
         <KV k="상품" v={`${PRODUCTS[p.product].name} · ${p.remaining === p.total ? '첫 수업' : `${p.total - p.remaining + 1}회차`}`} />
         <KV k="주제" v={a.topic} />
-        <KV k="수당" v={`회당 ${won(a.payout)} + 교통비`} />
+        <KV k="수당" v={`회당 ${won(a.payout)} (교통비 포함)`} />
       </Box>
       <View><T v="lbl">어르신 메모 <T v="cap">운영자 상담 기록 전체</T></T><Box tight><T style={{ fontSize: 13, lineHeight: 20 }}>{rec.opsMemo}</T></Box></View>
       {p.slot2 && <View><T v="lbl">맡을 일정</T><Chips><Chip big label="1순위" kind="line" sel={slot === 1} onPress={() => setSlot(1)} /><Chip big label="2순위" kind="line" sel={slot === 2} onPress={() => setSlot(2)} /></Chips></View>}

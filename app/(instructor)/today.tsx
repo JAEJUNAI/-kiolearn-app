@@ -22,7 +22,8 @@ export default function Today() {
   const weekCount = mine.filter((x) => new Date(x.scheduledAt) >= weekStart && new Date(x.scheduledAt) < weekEnd && x.status !== 'cancelled').length;
   const callsLeft = mine.filter((x) => x.status === 'scheduled' && new Date(x.scheduledAt) > new Date() && new Date(x.scheduledAt) < weekEnd).length;
 
-  const callSheet = (sid: string, phone = '010-0000-0000') => Alert.alert('어르신께 전화', `${phone}로 전화를 걸어요. 통화 결과를 알려 주세요.`, [
+  // 어르신 연락처는 배정이 확정되면 운영자가 문자로 보내 드려요(앱에 아직 연락처 연동이 없어요). 여기서는 통화 결과만 남겨요.
+  const callSheet = (sid: string) => Alert.alert('전날 통화 결과', '배정 문자로 받은 어르신 번호로 전화하셨나요? 결과를 알려 주세요.', [
     { text: '통화함', onPress: () => s.confirmCall(sid) }, { text: '통화 안 됨', onPress: () => s.callFailed(sid) }, { text: '닫기', style: 'cancel' }]);
   const arrive = async (sid: string) => {
     let dist: number | undefined;

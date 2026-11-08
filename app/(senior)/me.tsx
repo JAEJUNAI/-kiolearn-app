@@ -13,11 +13,11 @@ export default function Me() {
   const photos = reps.filter((x) => x.photo).slice(0, 3);
   return (
     <Screen>
-      <Row><Avatar src="seniorMan" size={76} /><Grow><T v="ttl" style={{ fontSize: 24 }}>{rec.name}</T>{org && <Chip label={org.name} kind="gray" big />}</Grow></Row>
+      <Row><Icon src="icActivity" size={76} /><Grow><T v="ttl" style={{ fontSize: 24 }}>{rec.name || rec.honorific}</T>{org && <Chip label={org.name} kind="gray" big />}</Grow></Row>
       {s.certificates.length > 0 ? s.certificates.map((c) => (
         <Cert key={c.id} style={{ padding: 14, alignItems: 'stretch' }}><Row><Icon src="icCert" size={44} /><Grow><T v="h">{c.course} 수료</T><T v="cap">{c.issuedAt.slice(0, 7).replace('-', '년 ')}월 · {c.issuer}</T></Grow></Row></Cert>
       )) : (
-        <Cert style={{ padding: 14, alignItems: 'stretch' }}><Row><Icon src="icCert" size={44} /><Grow><T v="h">스마트폰 기초 8주 수료</T><T v="cap">2026년 9월 · 복지관 과정</T></Grow></Row></Cert>
+        <Box kind="white" tight><Row><Icon src="icCert" size={44} /><Grow><T v="h" style={{ fontSize: 16 }}>수료증은 여기에 생겨요</T><T v="cap" style={{ fontSize: 15 }}>수업을 마치면 수료증이 나와요</T></Grow></Row></Box>
       )}
       <Box kind="white" tight><Row><Grow><T v="h" style={{ fontSize: 17 }}>혼자 해낸 것 {solo}개</T><T v="cap" style={{ fontSize: 13.5 }}>처음 성공 {firsts}번{reps[0] ? ` · 마지막은 ${reps[0].date.slice(5, 10).replace('-', '/')}` : ''}</T></Grow><Chip label="+1" /></Row></Box>
       <View>
