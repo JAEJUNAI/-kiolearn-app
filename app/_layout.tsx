@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { View, Pressable, Platform, useWindowDimensions, Linking } from 'react-native';
 import { Image } from 'expo-image';
 import { Stack, router } from 'expo-router';
-import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -101,18 +100,7 @@ export default function Root() {
   );
   return (
     <SafeAreaProvider>
-      {web && (
-        <Head>
-          <title>키오런 - 부모님 1:1 과외</title>
-          <meta name="description" content="자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁에 가서 90분 동안 함께 눌러 봐요. 그날 저녁 사진과 결과가 와요." />
-          <meta name="theme-color" content="#ffffff" />
-          <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-          <link rel="manifest" href="/manifest.webmanifest" />
-          <meta property="og:title" content="키오런 - 부모님 1:1 과외" />
-          <meta property="og:image" content="https://app.kiolearn.co.kr/icon-512.png" />
-        </Head>
-      )}
+      {/* 웹 제목·설명·공유 이미지는 페이지별 HTML(scripts/seo-build.mjs)에서 정해요 */}
       {desktop ? <DesktopShell>{app}</DesktopShell> : (
         <View style={{ flex: 1, backgroundColor: web ? '#f3f3f3' : '#fff' }}>
           <View style={{ flex: 1, width: '100%', maxWidth: web && !wide ? 480 : undefined, alignSelf: 'center', backgroundColor: '#fff' }}>{app}</View>

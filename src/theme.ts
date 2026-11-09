@@ -35,6 +35,7 @@ export const IMG = {
   teacher2: require('../assets/img/teacher2.jpg'),
   teacher3: require('../assets/img/teacher3.jpg'),
   lesson: require('../assets/img/photo-lesson.jpg'),
+  homeLesson: require('../assets/img/og-home.jpg'),
   kiosk: require('../assets/img/photo-kiosk.jpg'),
   cls: require('../assets/img/class.jpg'),
   seniorMan: require('../assets/img/senior-man.jpg'),
