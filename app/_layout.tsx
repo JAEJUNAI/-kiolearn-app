@@ -54,10 +54,12 @@ function DesktopShell({ children }: { children: React.ReactNode }) {
           <T style={{ fontFamily: F.extra, fontSize: 34, lineHeight: 44, letterSpacing: -0.8 }}>부모님 댁에{'\n'}선생님이 찾아가요</T>
           <T v="sub" style={{ fontSize: 15.5, lineHeight: 24 }}>자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁으로 가서 90분 동안 함께 눌러 봐요. 그날 저녁 사진과 "혼자 해낸 것"이 와요.</T>
           <View style={{ backgroundColor: '#fff', borderRadius: 24, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderWidth: 1, borderColor: C.line, marginTop: 8 }}>
-            <Image source={require('../assets/img/qr-app.png')} style={{ width: 108, height: 108, borderRadius: 10 }} />
+            <Image source={require('../assets/img/qr-app.png')} style={{ width: 108, height: 129, borderRadius: 10 }} />
             <View style={{ flex: 1 }}>
-              <T v="h">폰에서 앱 받기</T>
-              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 안드로이드는 구글 플레이로 연결돼요. 아이폰은 지금 웹으로 바로 쓸 수 있어요.</T>
+              <T v="h">안드로이드 앱 받기</T>
+              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 구글 플레이로 연결돼요.</T>
+              <View style={{ marginTop: 10, alignSelf: 'flex-start', backgroundColor: '#f3f3f3', borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}><T v="fine" style={{ fontFamily: F.semibold }}>아이폰 앱은 준비 중이에요</T></View>
+              <T v="fine" style={{ marginTop: 6 }}>아이폰은 같은 QR로 웹에서 바로 쓸 수 있어요.</T>
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
