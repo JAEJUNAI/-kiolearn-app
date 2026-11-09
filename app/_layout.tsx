@@ -43,7 +43,7 @@ function DesktopShell({ children }: { children: React.ReactNode }) {
       <View style={{ height: 64, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: C.line, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 32, gap: 10 }}>
         <Image source={require('../assets/img/app-mark.png')} style={{ width: 28, height: 28, borderRadius: 8 }} />
         <T style={{ fontFamily: F.extra, fontSize: 17 }}>키오런</T>
-        <T v="cap" style={{ marginLeft: 6 }}>부모님 1:1 과외</T>
+        <T v="cap" style={{ marginLeft: 6 }}>부모님 디지털 1:1 방문 수업</T>
         <View style={{ flex: 1 }} />
         <Pressable onPress={() => open('https://kiolearn.co.kr/lesson')}><T v="sub" style={{ fontFamily: F.semibold, marginRight: 22 }}>혼자 해 보는 수업</T></Pressable>
         <Pressable onPress={() => open('https://kiolearn.co.kr/teach')}><T v="sub" style={{ fontFamily: F.semibold, marginRight: 22 }}>강사 지원</T></Pressable>
@@ -56,8 +56,8 @@ function DesktopShell({ children }: { children: React.ReactNode }) {
           <View style={{ backgroundColor: '#fff', borderRadius: 24, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderWidth: 1, borderColor: C.line, marginTop: 8 }}>
             <Image source={require('../assets/img/qr-app.png')} style={{ width: 108, height: 108, borderRadius: 10 }} />
             <View style={{ flex: 1 }}>
-              <T v="h">폰으로 열기</T>
-              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 같은 화면이 폰에서 열려요. 설치 없이 바로 쓸 수 있고, 앱 스토어 버전은 심사 중이에요.</T>
+              <T v="h">폰에서 앱 받기</T>
+              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 안드로이드는 구글 플레이로 연결돼요. 아이폰은 지금 웹으로 바로 쓸 수 있어요.</T>
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
