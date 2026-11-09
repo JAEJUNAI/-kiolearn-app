@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useStore } from '../src/data/store';
-import { T, Btn } from '../src/ui';
+import { T, Row } from '../src/ui';
 import { setOnExpired, setToken } from '../src/lib/supabase';
 import { C, F } from '../src/theme';
 
@@ -36,42 +36,39 @@ function useShotHook() {
 
 const open = (url: string) => Linking.openURL(url).catch(() => {});
 
-/** PC 브라우저(폭 900 이상)에서는 왼쪽에 소개와 QR, 오른쪽에 폰 모양 틀 안의 앱을 보여 준다. */
+/** PC 브라우저(폭 900 이상): 왼쪽에 제목·QR·회사 정보, 오른쪽에 앱 화면을 위아래 꽉 차게(폰 테두리 없이). */
 function DesktopShell({ children }: { children: React.ReactNode }) {
+  const link = (label: string, url: string) => (
+    <Pressable onPress={() => open(url)}><T v="sub" style={{ fontFamily: F.semibold, fontSize: 14, textDecorationLine: 'underline' }}>{label}</T></Pressable>
+  );
   return (
-    <View style={{ flex: 1, backgroundColor: '#f3f3f3' }}>
-      <View style={{ height: 64, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: C.line, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 32, gap: 10 }}>
-        <Image source={require('../assets/img/app-mark.png')} style={{ width: 28, height: 28, borderRadius: 8 }} />
-        <T style={{ fontFamily: F.extra, fontSize: 17 }}>키오런</T>
-        <T v="cap" style={{ marginLeft: 6 }}>부모님 디지털 1:1 방문 수업</T>
-        <View style={{ flex: 1 }} />
-        <Pressable onPress={() => open('https://kiolearn.co.kr/lesson')}><T v="sub" style={{ fontFamily: F.semibold, marginRight: 22 }}>혼자 해 보는 수업</T></Pressable>
-        <Pressable onPress={() => open('https://kiolearn.co.kr/teach')}><T v="sub" style={{ fontFamily: F.semibold, marginRight: 22 }}>강사 지원</T></Pressable>
-        <Pressable onPress={() => open('https://kiolearn.co.kr')}><T v="sub" style={{ fontFamily: F.semibold }}>홈페이지</T></Pressable>
-      </View>
-      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 72, paddingHorizontal: 40, paddingVertical: 28 }}>
-        <View style={{ width: 380, gap: 14 }}>
-          <T style={{ fontFamily: F.extra, fontSize: 34, lineHeight: 44, letterSpacing: -0.8 }}>부모님 댁에{'\n'}선생님이 찾아가요</T>
-          <T v="sub" style={{ fontSize: 15.5, lineHeight: 24 }}>자녀가 날짜를 고르면 자격 확인을 마친 강사가 부모님 댁으로 가서 90분 동안 함께 눌러 봐요. 그날 저녁 사진과 "혼자 해낸 것"이 와요.</T>
-          <View style={{ backgroundColor: '#fff', borderRadius: 24, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 16, borderWidth: 1, borderColor: C.line, marginTop: 8 }}>
-            <Image source={require('../assets/img/qr-app.png')} style={{ width: 108, height: 129, borderRadius: 10 }} />
-            <View style={{ flex: 1 }}>
-              <T v="h">안드로이드 앱 받기</T>
-              <T v="cap" style={{ marginTop: 4 }}>카메라로 QR을 찍으면 구글 플레이로 연결돼요.</T>
-              <View style={{ marginTop: 10, alignSelf: 'flex-start', backgroundColor: '#f3f3f3', borderRadius: 99, paddingHorizontal: 10, paddingVertical: 4 }}><T v="fine" style={{ fontFamily: F.semibold }}>아이폰 앱은 준비 중이에요</T></View>
-              <T v="fine" style={{ marginTop: 6 }}>아이폰은 같은 QR로 웹에서 바로 쓸 수 있어요.</T>
-            </View>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-            <Btn label="방문 수업 알아보기" size="sm" onPress={() => open('https://kiolearn.co.kr/visit')} />
-            <Btn label="강사로 일하기" size="sm" kind="ghost" onPress={() => open('https://kiolearn.co.kr/teach')} />
-          </View>
-          <T v="fine" style={{ marginTop: 10 }}>오른쪽 화면은 실제 앱이에요. PC에서도 그대로 쓸 수 있어요.</T>
+    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', backgroundColor: '#f6f6f6' }}>
+      <View style={{ width: 400, marginRight: 96, paddingTop: 72, paddingBottom: 48, justifyContent: 'space-between' }}>
+        <View style={{ gap: 18 }}>
+          <Row style={{ gap: 10 }}>
+            <Image source={require('../assets/img/app-mark.png')} style={{ width: 32, height: 32, borderRadius: 9 }} />
+            <T style={{ fontFamily: F.extra, fontSize: 18 }}>키오런</T>
+          </Row>
+          <T style={{ fontFamily: F.extra, fontSize: 40, lineHeight: 52, letterSpacing: -1 }}>부모님 댁으로{'\n'}찾아가는 디지털{'\n'}1:1 방문 수업</T>
+          <T v="sub" style={{ fontSize: 16, lineHeight: 25 }}>휴대폰, 키오스크, 은행 앱, AI까지.{'\n'}수업이 끝나면 사진과 결과가 와요.</T>
         </View>
-        <View style={{ width: 412, height: 860, maxHeight: '96%', borderRadius: 44, borderWidth: 10, borderColor: '#141311', backgroundColor: '#141311', overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 40, shadowOffset: { width: 0, height: 24 } }}>
-          <View style={{ flex: 1, backgroundColor: '#fff', borderRadius: 34, overflow: 'hidden' }}>{children}</View>
+        <View style={{ gap: 14 }}>
+          <T style={{ fontFamily: F.bold, fontSize: 18, lineHeight: 26 }}>QR코드 찍고{'\n'}앱으로 예약하기</T>
+          <Image source={require('../assets/img/qr-app.png')} style={{ width: 132, height: 158, borderRadius: 6 }} />
+          <T v="fine">아이폰 앱은 준비 중이에요. 오른쪽 화면에서 바로 쓸 수 있어요.</T>
+          <Row style={{ gap: 18, marginTop: 6 }}>
+            {link('방문 수업 알아보기', 'https://kiolearn.co.kr/visit')}
+            {link('강사로 일하기', 'https://kiolearn.co.kr/teach')}
+            {link('홈페이지', 'https://kiolearn.co.kr')}
+          </Row>
+        </View>
+        <View style={{ gap: 8 }}>
+          <T style={{ fontFamily: F.bold, fontSize: 13 }}>(주) 재준에이아이</T>
+          <T v="fine" style={{ lineHeight: 19 }}>대표 박성수 · 사업자등록번호 485-81-04147{'\n'}통신판매업 신고 2025-서울강남-06245{'\n'}서울특별시 강남구 논현로26길 46, 5층 506호{'\n'}문의 010-3871-5430</T>
+          <T v="fine" style={{ marginTop: 6 }}>Copyright © KIOLEARN. All Rights Reserved.</T>
         </View>
       </View>
+      <View style={{ width: 430, backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 24, shadowOffset: { width: 0, height: 0 } }}>{children}</View>
     </View>
   );
 }
